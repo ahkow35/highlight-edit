@@ -38,7 +38,7 @@ export default function FieldRow({
             case 'email': return 'email';
             case 'phone': return 'tel';
             case 'number':
-            case 'currency': return 'number';
+            case 'currency': return 'text';  // Use text for free-form input without spinners
             case 'date': return 'date';
             default: return 'text';
         }
