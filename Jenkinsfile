@@ -74,11 +74,6 @@ pipeline {
                     # Check if required environment variables exist
                     MISSING_VARS=""
                     
-                    # Check for OPENAI_API_KEY
-                    if ! jq -e '.[] | select(.name == "OPENAI_API_KEY")' existing_env.json > /dev/null 2>&1; then
-                        MISSING_VARS="OPENAI_API_KEY"
-                    fi
-                    
                     if [ -n "$MISSING_VARS" ]; then
                         echo "ERROR: Missing required environment variables: $MISSING_VARS"
                         echo "Please set them in Portainer's stack environment variables before deploying."
