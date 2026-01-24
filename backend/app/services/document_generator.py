@@ -178,15 +178,124 @@ def strip_all_highlights_from_docx(doc_path: str, output_path: str) -> None:
     doc.save(output_path)
 
 
-def get_output_filename(template_path: str, prefix: str = "filled_") -> str:
-    """Generate an output filename based on the template path."""
-    base_name = os.path.basename(template_path)
-    name, ext = os.path.splitext(base_name)
-    
-    # Remove _template suffix if present
-    if name.endswith("_template"):
-        name = name[:-9]
-    elif "_template_" in name:
-        name = name.split("_template_")[0]
-    
     return f"{prefix}{name}{ext}"
+
+
+def generate_pdf(
+    template_path: str,
+    field_values: Dict[str, str],
+    output_path: Optional[str] = None,
+) -> bytes:
+    """
+    Generate a PDF document with placeholders replaced by user values.
+
+    Args:
+        template_path: Path to the template PDF file
+        field_values: Dict mapping field names (field_1, field_2, etc.) to values
+        output_path: Optional path to save the output file
+
+    Returns:
+        Generated document as bytes
+    """
+    import fitz
+    import json
+    
+    # Load the template
+    doc = fitz.open(template_path)
+    
+    # Iterate through all pages
+    for page in doc:
+        # Collect replacements for this page
+        # Format: (rect, new_text, alignment_info)
+        replacements = []
+        
+        # Get all annotations
+        # annotations is a generator
+        
+        count = 0
+        annots_to_delete = []
+        replacements = []
+        
+        # We must iterate the generator.
+        for annot in page.annots():
+            count += 1
+            # Check for Text annotation (Sticky Note) - Type 0
+            if annot.type[0] == 0:
+                info = annot.info
+                content = info.get("content", "")
+                
+                try:
+                    metadata = json.loads(content)
+                    placeholder = metadata.get("placeholder")
+                    
+                    if not placeholder:
+                        continue
+                        
+                    key = placeholder.replace("{{", "").replace("}}", "").strip()
+                    
+                    if key in field_values:
+                        user_value = field_values.get(key, "")
+                        rect_coords = metadata.get("rect")
+                        
+                        if rect_coords:
+                             target_rect = fitz.Rect(rect_coords)
+                        else:
+                             target_rect = annot.rect
+                        
+                        # Store replacement info
+                        replacements.append((target_rect, str(user_value)))
+                        annots_to_delete.append(annot)
+                        page.add_redact_annot(target_rect, fill=(1, 1, 1))
+                        
+                    else:
+                        pass
+                        
+                except json.JSONDecodeError:
+                    continue
+                except Exception as e:
+                    # print(f"Error processing annotation: {e}") # Removed print statement
+                    continue
+        
+        
+        if replacements:
+            page.apply_redactions()
+        
+        # Apply Redactions (removes old text and draws white fill)
+        # This physically removes content
+        page.apply_redactions()
+        
+        # Remove the marker annotations
+        for annot in annots_to_delete:
+            page.delete_annot(annot)
+            
+        # Draw new text
+        for rect, text in replacements:
+            # Insert text
+            # Auto-scale font?
+            fontsize = 11
+            if rect.height > 0:
+                # Approximate header/body size heuristic
+                # But safer to pick a standard readable size or match original?
+                # We don't know original font size easily without parsing more.
+                # Let's pick a sane default or limit.
+                fontsize = min(rect.height * 0.7, 12) 
+            
+            page.insert_textbox(
+                rect, 
+                text, 
+                fontsize=fontsize,
+                fontname="helv", 
+                color=(0, 0, 0),
+                align=0
+            )
+
+    # Save to bytes
+    output_bytes = doc.tobytes(garbage=4)
+    doc.close()
+
+    # Optionally save to file
+    if output_path:
+        with open(output_path, 'wb') as f:
+            f.write(output_bytes)
+
+    return output_bytes

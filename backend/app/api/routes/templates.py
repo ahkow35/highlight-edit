@@ -180,12 +180,19 @@ async def _generate_document(request: GenerateRequest, db: Session, is_preview: 
             
             # Generate document with the service
             generate_docx(template_path, field_values, output_path)
+            media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             
         elif template_path.lower().endswith(".pdf"):
-            raise HTTPException(
-                status_code=501,
-                detail="PDF generation not yet implemented. Please use DOCX files."
-            )
+            from app.services.document_generator import generate_pdf
+            
+            # Generate output path
+            prefix = "preview_" if is_preview else "filled_"
+            output_filename = get_output_filename(template_path, prefix)
+            output_path = os.path.join(os.path.dirname(template_path), output_filename)
+            
+            generate_pdf(template_path, field_values, output_path)
+            media_type = "application/pdf"
+
         else:
             raise HTTPException(status_code=400, detail="Unsupported file type")
         
@@ -193,7 +200,7 @@ async def _generate_document(request: GenerateRequest, db: Session, is_preview: 
         return FileResponse(
             path=output_path,
             filename=output_filename,
-            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            media_type=media_type,
             headers={
                 "Content-Disposition": f"attachment; filename={output_filename}"
             }
