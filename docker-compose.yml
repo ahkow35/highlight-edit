@@ -21,7 +21,7 @@ services:
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - BETA_INVITE_CODE=${BETA_INVITE_CODE:-I-LOVE-NYAN-CAT}
     volumes:
-      - mnt/data/yk_highlight-edit/data:/data
+      - /mnt/data/yk_highlight-edit/data:/data
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
