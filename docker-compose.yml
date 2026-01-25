@@ -20,6 +20,8 @@ services:
       - DATABASE_PATH=/data/sql_app.db
       - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
       - BETA_INVITE_CODE=${BETA_INVITE_CODE:-I-LOVE-NYAN-CAT}
+      - ADOBE_CLIENT_ID=${ADOBE_CLIENT_ID}
+      - ADOBE_CLIENT_SECRET=${ADOBE_CLIENT_SECRET}
     volumes:
       - /mnt/data/yk_highlight-edit/data:/data
     restart: unless-stopped
