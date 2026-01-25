@@ -8,7 +8,7 @@ RUN npm ci
 
 COPY . .
 
-# Build arg for API URL - set via Railway environment variables
+# Build arg for API URL - set via CI/CD environment variables
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
 

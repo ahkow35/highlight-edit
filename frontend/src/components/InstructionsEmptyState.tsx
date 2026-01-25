@@ -16,7 +16,7 @@ export default function InstructionsEmptyState() {
                     </div>
                     <h3 className="text-lg font-semibold text-white mb-2">Highlight Variables</h3>
                     <p className="text-slate-400 text-sm">
-                        Open your document and mark any text you want to change with Yellow Highlight.
+                        Open your Word Document and mark any text you want to change with Yellow Highlight.
                     </p>
                 </div>
 

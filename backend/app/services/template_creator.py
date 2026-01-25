@@ -16,7 +16,7 @@ from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-import fitz  # PyMuPDF
+from enum import Enum
 from docx import Document
 from docx.shared import RGBColor
 from docx.enum.text import WD_COLOR_INDEX
@@ -210,94 +210,11 @@ def create_template(
     
     if filename_lower.endswith(".docx"):
         return process_docx_template(file_content, output_dir, filename)
-    elif filename_lower.endswith(".pdf"):
-        return process_pdf_template(file_content, output_dir, filename)
     else:
-        raise ValueError(f"Unsupported file type: {filename}. Only .docx and .pdf are supported.")
+        raise ValueError(f"Unsupported file type: {filename}. Only .docx files are supported.")
 
 
-# ============ Helper Functions ============
 
-def process_pdf_template(
-    file_content: bytes,
-    output_dir: str,
-    original_filename: str = "document.pdf"
-) -> TemplateState:
-    """
-    Process a PDF file to create a template with placeholders.
-    """
-    # 1. Extract highlights using the robust parser
-    from app.services.pdf_parser import extract_pdf_highlights
-    
-    print(f"DEBUG: Extracting highlights from {original_filename}")
-    try:
-        # Now synchronous
-        highlights = extract_pdf_highlights(file_content)
-        print(f"DEBUG: Found {len(highlights)} highlights via pdf_parser")
-    except Exception as e:
-        print(f"ERROR: Failed to extract highlights: {e}")
-        raise ValueError(f"Failed to parse PDF: {e}")
-
-    # 2. Open PDF for modification (to add placeholder annotations)
-    doc = fitz.open(stream=file_content, filetype="pdf")
-    
-    fields: List[DetectedField] = []
-    field_counter = 1
-    
-    # 3. Process extracted highlights
-    for h in highlights:
-        # Create placeholder
-        placeholder = f"{{{{field_{field_counter}}}}}"
-        
-        # Create DetectedField
-        field = DetectedField(
-            id=field_counter,
-            original_text=h.original_text,
-            field_type=_infer_field_type(h.original_text),
-            placeholder=placeholder,
-            page=h.page,
-        )
-        fields.append(field)
-        
-        # Add annotation to PDF to mark this field
-        # Note: h.page is 1-indexed, fitz is 0-indexed
-        if 0 <= h.page - 1 < len(doc):
-            page = doc[h.page - 1]
-            rect = fitz.Rect(h.rect['x0'], h.rect['y0'], h.rect['x1'], h.rect['y1'])
-            
-            # We add a text annotation (sticky note) to store metadata
-            # This is used later to identify where to put the text
-            annot = page.add_text_annot(rect.tl, placeholder)
-            annot.set_info({
-                "title": f"HighlightEdit Field {field_counter}",
-                "content": json.dumps({
-                    "placeholder": placeholder,
-                    "original": h.original_text,
-                    "rect": [rect.x0, rect.y0, rect.x1, rect.y1]
-                }),
-            })
-            annot.update()
-        
-        field_counter += 1
-    
-    # Generate unique template filename
-    template_id = str(uuid.uuid4())[:8]
-    base_name = os.path.splitext(original_filename)[0]
-    template_filename = f"{base_name}_template_{template_id}.pdf"
-    template_path = os.path.join(output_dir, template_filename)
-    
-    # Ensure output directory exists
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Save the modified PDF
-    doc.save(template_path)
-    doc.close()
-    
-    return TemplateState(
-        template_file_path=template_path,
-        original_file_path=original_filename,
-        fields=fields,
-    )
 
 def _process_paragraph_runs(paragraph, para_idx: int, fields: List[DetectedField], field_counter: int) -> int:
     """
@@ -416,16 +333,6 @@ def _is_yellow_color(rgb: List[float], tolerance: float = 0.3) -> bool:
     return r > 0.7 and g > 0.7 and b < tolerance
 
 
-def _is_yellow_pdf_color(color_int: int) -> bool:
-    """Check if a PDF color integer represents yellow."""
-    # Convert int to RGB components
-    if color_int == 0:
-        return False
-    # Common yellow values in PDF: 0xFFFF00, etc.
-    r = (color_int >> 16) & 0xFF
-    g = (color_int >> 8) & 0xFF
-    b = color_int & 0xFF
-    return r > 200 and g > 200 and b < 100
 
 
 def _text_already_captured(text: str, fields: List[DetectedField]) -> bool:

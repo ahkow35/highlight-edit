@@ -8,7 +8,6 @@ from app.models.schemas import (
     HighlightedField,
     DocumentGenerateRequest,
 )
-from app.services.pdf_parser import extract_pdf_highlights
 from app.services.docx_parser import extract_docx_highlights
 
 router = APIRouter()
@@ -27,14 +26,12 @@ async def upload_document(file: UploadFile = File(...)):
     content = await file.read()
 
     try:
-        if filename_lower.endswith(".pdf"):
-            highlights = extract_pdf_highlights(content)
-        elif filename_lower.endswith(".docx"):
+        if filename_lower.endswith(".docx"):
             highlights = await extract_docx_highlights(content, file.filename)
         else:
             raise HTTPException(
                 status_code=400,
-                detail="Unsupported file type. Only PDF and DOCX are supported.",
+                detail="Unsupported file type. Only Word (.docx) files are supported.",
             )
 
         return DocumentUploadResponse(

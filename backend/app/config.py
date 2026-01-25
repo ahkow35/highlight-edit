@@ -29,8 +29,14 @@ class Settings(BaseSettings):
     # File retention (hours)
     file_retention_hours: int = 24
 
+    # Adobe PDF Services
+    adobe_client_id: str = ""
+    adobe_client_secret: str = ""
+
     class Config:
-        env_file = ".env"
+        # Load .env from project root (../../.env relative to this file)
+        import os
+        env_file = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env")
         env_file_encoding = "utf-8"
 
 

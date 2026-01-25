@@ -207,11 +207,17 @@ export const templateApi = {
     async generateFinalDocument(
         templatePath: string | null,
         templateId: number | null,
-        fieldValues: Record<string, string>
+        fieldValues: Record<string, string>,
+        outputFormat: string = 'docx'
     ): Promise<Blob> {
         const response = await api.post(
             '/templates/generate',
-            { template_path: templatePath, template_id: templateId, field_values: fieldValues },
+            {
+                template_path: templatePath,
+                template_id: templateId,
+                field_values: fieldValues,
+                output_format: outputFormat
+            },
             { responseType: 'blob' }
         );
         return response.data;

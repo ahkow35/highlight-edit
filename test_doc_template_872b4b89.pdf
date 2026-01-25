@@ -1,0 +1,95 @@
+%PDF-1.7
+%µ¶
+
+1 0 obj
+<</Type/Catalog/Pages 2 0 R>>
+endobj
+
+2 0 obj
+<</Type/Pages/Count 1/Kids[4 0 R]>>
+endobj
+
+3 0 obj
+<</Font<</helv 6 0 R>>>>
+endobj
+
+4 0 obj
+<</Type/Page/MediaBox[0 0 595 842]/Rotate 0/Resources 3 0 R/Parent 2 0 R/Contents[5 0 R 7 0 R]/Annots[8 0 R 9 0 R]>>
+endobj
+
+5 0 obj
+<</Length 36>>
+stream
+
+q
+100 722 100 20 re
+h
+1 1 0 rg f
+Q
+
+endstream
+endobj
+
+6 0 obj
+<</Type/Font/Subtype/Type1/BaseFont/Helvetica/Encoding/WinAnsiEncoding>>
+endobj
+
+7 0 obj
+<</Length 65>>
+stream
+
+q
+BT
+1 0 0 1 100 727 Tm
+/helv 11 Tf [<4d79204669656c64>]TJ
+ET
+Q
+
+endstream
+endobj
+
+8 0 obj
+<</Type/Annot/Subtype/Text/Rect[101 723 119 741]/C[1 1 0]/Popup 9 0 R/P 4 0 R/F 28/Contents({"placeholder": "{{field_1}}", "original": "My Field", "rect": [100.0, 100.0, 200.0, 120.0]})/Name/Note/AP<</N 10 0 R>>/NM(fitz-A0)/T(HighlightEdit Field 1)>>
+endobj
+
+9 0 obj
+<</Type/Annot/Subtype/Popup/Parent 8 0 R/Rect[32 730 232 830]>>
+endobj
+
+10 0 obj
+<</Type/XObject/Subtype/Form/BBox[0 0 16 16]/Matrix[1 0 0 1 0 0]/Length 99>>
+stream
+1 1 0 rg
+1 w
+0.5 0.5 15 15 re
+b
+1 0 0 -1 4 12 cm
+0 g
+0 0 8 1 re
+0 2 8 1 re
+0 4 8 1 re
+0 6 8 1 re
+f
+
+endstream
+endobj
+
+xref
+0 11
+0000000000 65535 f 
+0000000016 00000 n 
+0000000062 00000 n 
+0000000114 00000 n 
+0000000155 00000 n 
+0000000288 00000 n 
+0000000373 00000 n 
+0000000462 00000 n 
+0000000576 00000 n 
+0000000843 00000 n 
+0000000923 00000 n 
+
+trailer
+<</Size 11/Root 1 0 R/ID[<35C2B2C39EC29EC2907CC3B514C3B255><43D2DAF28756D8A983A511DF42404090>]>>
+startxref
+1134
+%%EOF
