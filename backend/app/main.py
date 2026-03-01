@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from app.api.routes import documents, health, templates, auth, admin
+from app.api.routes import documents, health, templates, auth, admin, analytics
 from app.db.database import engine, Base
 
 # Create tables
@@ -34,6 +34,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(documents.router, prefix="/api/documents", tags=["documents"])
 app.include_router(templates.router, prefix="/api/templates", tags=["templates"])
 app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
+app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 
 # Serve static frontend files if the static directory exists (Docker deployment)
 STATIC_DIR = Path(__file__).parent.parent / "static"

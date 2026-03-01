@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     # Security
     secret_key: str = "change-me-in-production"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
+    access_token_expire_minutes: int = 10080  # 7 days
 
     # Storage
     storage_provider: str = "local"  # "local" or "s3"

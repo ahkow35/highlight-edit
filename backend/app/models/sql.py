@@ -16,6 +16,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     templates = relationship("Template", back_populates="owner")
+    usage_events = relationship("UsageEvent", backref="user", lazy="dynamic")
 
 class Template(Base):
     __tablename__ = "templates"
@@ -38,3 +39,16 @@ class IPUsage(Base):
     ip_address = Column(String, index=True)
     usage_count = Column(Integer, default=0)
     last_reset_date = Column(Date, default=date.today)
+
+
+class UsageEvent(Base):
+    """Tracks every meaningful user action for analytics."""
+    __tablename__ = "usage_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
+    event_type = Column(String, index=True)
+    metadata_json = Column(JSON, nullable=True)
+    ip_address = Column(String, nullable=True)
+    user_agent = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)

@@ -10,6 +10,7 @@ import { templateApi, TemplateState } from '../services/api';
 import { FieldRow } from '../components/FieldRow';
 import { useAuth } from '../context/AuthContext';
 import InstructionsEmptyState from '../components/InstructionsEmptyState';
+import UsageIndicator from '../components/UsageIndicator';
 
 interface FormData {
     [key: string]: string;
@@ -217,6 +218,11 @@ export default function TemplateEditor() {
 
     return (
         <div className="max-w-3xl mx-auto px-6">
+            {/* Usage Indicator for free users */}
+            <div className="mb-6">
+                <UsageIndicator />
+            </div>
+
             {/* Error Banner */}
             {error && (
                 <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-between">

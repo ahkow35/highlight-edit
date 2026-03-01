@@ -10,6 +10,7 @@ from app.models.sql import User
 from app.models.schemas import UserCreate, UserResponse, Token, PasswordResetRequest, PasswordResetConfirm
 from app.config import settings
 from app.api.deps import get_current_user
+from app.services.usage_tracker import track_event
 
 router = APIRouter()
 
@@ -50,6 +51,7 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    track_event(db, "signup", user_id=new_user.id)
     return new_user
 
 @router.post("/login", response_model=Token)
@@ -67,6 +69,7 @@ def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Sessio
     access_token = create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires
     )
+    track_event(db, "login", user_id=user.id)
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserResponse)
@@ -78,6 +81,7 @@ def upgrade_user(db: Session = Depends(get_db), current_user: User = Depends(get
     current_user.is_paid = True
     db.commit()
     db.refresh(current_user)
+    track_event(db, "upgrade", user_id=current_user.id, metadata={"to_plan": "pro"})
     return current_user
 @router.post("/forgot-password")
 def forgot_password(request: PasswordResetRequest, db: Session = Depends(get_db)):

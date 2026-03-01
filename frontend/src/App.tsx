@@ -7,6 +7,7 @@ import TemplatesList from './pages/TemplatesList';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import ResetPasswordPage from './pages/ResetPassword';
 import AdminPage from './pages/Admin';
+import AnalyticsPage from './pages/Analytics';
 import { useAuth } from './context/AuthContext';
 
 // Admin email for conditional navbar link
@@ -39,6 +40,11 @@ function Header() {
                                 {user?.email === ADMIN_EMAIL && (
                                     <Link to="/admin" className="text-sm font-medium text-purple-400 hover:text-purple-300 transition-colors">
                                         Admin
+                                    </Link>
+                                )}
+                                {user?.email === ADMIN_EMAIL && (
+                                    <Link to="/analytics" className="text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
+                                        Analytics
                                     </Link>
                                 )}
                                 <Link to="/templates" className="text-sm font-medium text-slate-300 hover:text-white transition-colors">
@@ -106,6 +112,15 @@ function Header() {
                                         Admin
                                     </Link>
                                 )}
+                                {user?.email === ADMIN_EMAIL && (
+                                    <Link
+                                        to="/analytics"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="block py-2 text-sm font-medium text-cyan-400 hover:text-cyan-300 transition-colors"
+                                    >
+                                        Analytics
+                                    </Link>
+                                )}
                                 <Link
                                     to="/templates"
                                     onClick={() => setMobileMenuOpen(false)}
@@ -160,6 +175,7 @@ function App() {
                         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                         <Route path="/reset-password" element={<ResetPasswordPage />} />
                         <Route path="/admin" element={<AdminPage />} />
+                        <Route path="/analytics" element={<AnalyticsPage />} />
                     </Routes>
                 </main>
             </div>

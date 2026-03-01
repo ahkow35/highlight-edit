@@ -7,6 +7,7 @@ from app.config import settings
 from app.db.database import get_db
 from app.models.sql import User
 from app.models.schemas import TokenData
+from app.services.usage_tracker import track_event
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="auth/login", auto_error=False)
@@ -111,6 +112,9 @@ async def check_usage_limit(
     
     # Check if limit exceeded for free logged-in users
     if current_user.usage_count >= FREE_TIER_DAILY_LIMIT:
+        track_event(db, "limit_hit", user_id=current_user.id, metadata={
+            "limit_type": "monthly_docs",
+        })
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail=f"Daily limit of {FREE_TIER_DAILY_LIMIT} document generations reached. Upgrade to Pro for unlimited access."
@@ -140,6 +144,9 @@ async def check_template_save_limit(
     template_count = len(current_user.templates) if current_user.templates else 0
     
     if template_count >= FREE_TIER_TEMPLATE_LIMIT:
+        track_event(db, "limit_hit", user_id=current_user.id, metadata={
+            "limit_type": "template_save",
+        })
         raise HTTPException(
             status_code=status.HTTP_402_PAYMENT_REQUIRED,
             detail=f"Free tier allows only {FREE_TIER_TEMPLATE_LIMIT} saved template(s). Upgrade to Pro for unlimited templates."

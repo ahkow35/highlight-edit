@@ -13,6 +13,7 @@ from app.db.database import get_db
 from app.api.deps import get_current_paid_user, check_usage_limit, check_template_save_limit, get_current_user
 from app.models.sql import User, Template
 from app.models.schemas import TemplateSaveRequest, TemplateResponse
+from app.services.usage_tracker import track_event
 
 router = APIRouter()
 
@@ -29,7 +30,7 @@ class GenerateRequest(BaseModel):
 
 
 @router.post("/create")
-async def create_template_endpoint(file: UploadFile = File(...)):
+async def create_template_endpoint(file: UploadFile = File(...), db: Session = Depends(get_db)):
     """
     Upload a DOCX or PDF file with yellow highlights to create a template.
     Public endpoint.
@@ -56,6 +57,13 @@ async def create_template_endpoint(file: UploadFile = File(...)):
             filename=file.filename,
             output_dir=TEMPLATES_DIR,
         )
+        
+        # Track template creation
+        field_count = len(template_state.fields) if template_state.fields else 0
+        track_event(db, "template_create", metadata={
+            "filename": file.filename,
+            "field_count": field_count,
+        })
         
         # Return the template state as JSON
         return JSONResponse(content=template_state.to_dict())
@@ -101,6 +109,9 @@ def save_template(
     db.add(db_template)
     db.commit()
     db.refresh(db_template)
+    track_event(db, "template_save", user_id=current_user.id, metadata={
+        "template_name": template_data.name,
+    })
     return db_template
 
 
@@ -145,7 +156,16 @@ async def generate_document(
     Generate the final document with field values replaced.
     Enforces daily usage limits for free tier users.
     """
-    return await _generate_document(request, db, is_preview=False, current_user=current_user)
+    result = await _generate_document(request, db, is_preview=False, current_user=current_user)
+    
+    # Track export event
+    event_type = "export_pdf" if request.output_format.lower() == "pdf" else "export_docx"
+    user_id = current_user.id if current_user else None
+    track_event(db, event_type, user_id=user_id, metadata={
+        "output_format": request.output_format,
+    })
+    
+    return result
 
 
 async def _generate_document(request: GenerateRequest, db: Session, is_preview: bool, current_user: User = None):

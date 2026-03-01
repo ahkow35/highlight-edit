@@ -81,6 +81,7 @@ export interface User {
     email: string;
     is_paid: boolean;
     created_at: string;
+    usage_count: number;
 }
 
 export interface AuthResponse {
@@ -258,6 +259,79 @@ export const adminApi = {
      */
     async deleteUser(userId: number): Promise<void> {
         await api.delete(`/admin/users/${userId}`);
+    },
+};
+
+// --- Analytics Types ---
+
+export interface AnalyticsOverview {
+    total_users: number;
+    active_users_today: number;
+    active_users_this_week: number;
+    active_users_this_month: number;
+    total_events_today: number;
+    total_documents_generated: number;
+    plan_distribution: Record<string, number>;
+    signups_this_week: number;
+}
+
+export interface EventSeriesPoint {
+    date: string;
+    [eventType: string]: string | number;
+}
+
+export interface EventSeries {
+    series: EventSeriesPoint[];
+}
+
+export interface AnalyticsUser {
+    id: number;
+    email: string;
+    plan: string;
+    total_events: number;
+    last_active: string | null;
+    documents_generated: number;
+    signup_date: string | null;
+}
+
+export interface UserDetail {
+    user: { id: number; email: string; plan: string };
+    stats: {
+        total_events: number;
+        events_this_month: number;
+        documents_generated: number;
+        templates_saved: number;
+        limit_hits: number;
+        last_active: string | null;
+    };
+    recent_events: Array<{
+        event_type: string;
+        created_at: string;
+        metadata: Record<string, any>;
+    }>;
+}
+
+export const analyticsApi = {
+    async getOverview(): Promise<AnalyticsOverview> {
+        const response = await api.get<AnalyticsOverview>('/analytics/overview');
+        return response.data;
+    },
+
+    async getEvents(days: number = 30, eventType?: string): Promise<EventSeries> {
+        const params = new URLSearchParams({ days: days.toString() });
+        if (eventType) params.append('event_type', eventType);
+        const response = await api.get<EventSeries>(`/analytics/events?${params}`);
+        return response.data;
+    },
+
+    async getTopUsers(limit: number = 20): Promise<{ users: AnalyticsUser[] }> {
+        const response = await api.get(`/analytics/users?sort=events&order=desc&limit=${limit}`);
+        return response.data;
+    },
+
+    async getUserDetail(userId: number): Promise<UserDetail> {
+        const response = await api.get<UserDetail>(`/analytics/user/${userId}`);
+        return response.data;
     },
 };
 
