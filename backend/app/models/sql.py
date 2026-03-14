@@ -67,3 +67,15 @@ class TemplateDraft(Base):
     template_id = Column(String, index=True)  # template_file_path string
     field_data = Column(JSON)  # {"field_1": "John", "field_2": "2026-03-01"}
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class PasswordResetToken(Base):
+    """One-time password reset tokens."""
+    __tablename__ = "password_reset_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True)
+    token_hash = Column(String, unique=True, index=True)  # SHA-256 of the raw token
+    expires_at = Column(DateTime)
+    used = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)

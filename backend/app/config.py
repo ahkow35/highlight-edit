@@ -39,6 +39,14 @@ class Settings(BaseSettings):
     # Admin seed (used by scripts/seed_admin.py only)
     admin_email: str = ""  # Email of the initial admin user (used for seeding only)
 
+    # Email (SMTP)
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: str = ""
+    smtp_password: str = ""
+    smtp_from_email: str = ""
+    app_base_url: str = "http://localhost:5173"
+
     class Config:
         # Load .env from project root (../../.env relative to this file)
         import os
