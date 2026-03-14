@@ -44,16 +44,9 @@ async def get_current_paid_user(current_user: Annotated[User, Depends(get_curren
     return current_user
 
 
-# Admin email for dashboard access
-ADMIN_EMAIL = "nyanyk@gmail.com"
-
-
 async def get_current_admin_user(current_user: Annotated[User, Depends(get_current_user)]):
-    """
-    Check if the current user is the admin.
-    Only the admin email can access admin endpoints.
-    """
-    if current_user.email != ADMIN_EMAIL:
+    """Only users with is_admin=True can access admin endpoints."""
+    if not current_user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"

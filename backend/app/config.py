@@ -36,6 +36,9 @@ class Settings(BaseSettings):
     adobe_client_id: str = ""
     adobe_client_secret: str = ""
 
+    # Admin seed (used by scripts/seed_admin.py only)
+    admin_email: str = ""  # Email of the initial admin user (used for seeding only)
+
     class Config:
         # Load .env from project root (../../.env relative to this file)
         import os

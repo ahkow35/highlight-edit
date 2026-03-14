@@ -10,6 +10,7 @@ class User(Base):
     email = Column(String, unique=True, index=True)
     hashed_password = Column(String)
     is_paid = Column(Boolean, default=False)
+    is_admin = Column(Boolean, default=False)
     usage_count = Column(Integer, default=0)  # Daily generation count
     template_count = Column(Integer, default=0)  # Number of templates saved (free tier limit: 1)
     last_reset_date = Column(Date, default=date.today)  # Date of last counter reset

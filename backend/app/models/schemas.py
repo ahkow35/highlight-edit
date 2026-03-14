@@ -55,6 +55,7 @@ class UserLogin(UserBase):
 class UserResponse(UserBase):
     id: int
     is_paid: bool
+    is_admin: bool = False
     usage_count: int = 0
     created_at: datetime
     

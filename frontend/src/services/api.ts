@@ -80,6 +80,7 @@ export interface User {
     id: number;
     email: string;
     is_paid: boolean;
+    is_admin: boolean;
     created_at: string;
     usage_count: number;
 }
