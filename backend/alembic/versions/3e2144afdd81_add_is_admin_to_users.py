@@ -24,6 +24,13 @@ def upgrade() -> None:
     with op.batch_alter_table('users', schema=None) as batch_op:
         batch_op.add_column(sa.Column('is_admin', sa.Boolean(), nullable=True))
 
+    # Set all existing NULL values to False
+    op.execute("UPDATE users SET is_admin = 0 WHERE is_admin IS NULL")
+
+    # Alter column to NOT NULL
+    with op.batch_alter_table('users', schema=None) as batch_op:
+        batch_op.alter_column('is_admin', existing_type=sa.Boolean(), nullable=False)
+
     # ### end Alembic commands ###
 
 
