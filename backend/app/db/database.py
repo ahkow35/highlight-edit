@@ -4,7 +4,7 @@ import os
 
 # Database path from environment, defaulting to local
 # Production: mount volume at /data and set DATABASE_PATH=/data/sql_app.db
-DATABASE_PATH = os.getenv("DATABASE_PATH", "./sql_app.db")
+DATABASE_PATH = os.getenv("DATABASE_PATH", "./data/sql_app.db")
 SQLALCHEMY_DATABASE_URL = f"sqlite:///{DATABASE_PATH}"
 
 engine = create_engine(
