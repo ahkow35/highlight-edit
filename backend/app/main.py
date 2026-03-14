@@ -8,14 +8,19 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from app.api.routes import documents, health, templates, auth, admin, analytics, drafts
-from app.db.database import engine, Base
 from app.config import settings
 from app.logging_config import configure_logging
 
 configure_logging(debug=settings.debug)
 
-# Create tables
-Base.metadata.create_all(bind=engine)
+# Run database migrations on startup
+import os as _os
+from alembic.config import Config as _AlembicConfig
+from alembic import command as _alembic_command
+
+_alembic_ini = _os.path.join(_os.path.dirname(__file__), "..", "alembic.ini")
+_alembic_cfg = _AlembicConfig(_alembic_ini)
+_alembic_command.upgrade(_alembic_cfg, "head")
 
 app = FastAPI(
     title="Highlight Edit API",
