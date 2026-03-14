@@ -54,7 +54,7 @@ function Header() {
                                     {user?.email} {user?.is_paid && <span className="text-xs bg-green-900 text-green-300 px-1.5 py-0.5 rounded ml-1">PRO</span>}
                                 </span>
                                 <button
-                                    onClick={logout}
+                                    onClick={() => void logout()}
                                     className="text-sm text-slate-400 hover:text-white transition-colors"
                                 >
                                     Sign Out
@@ -129,7 +129,7 @@ function Header() {
                                     My Templates
                                 </Link>
                                 <button
-                                    onClick={() => { logout(); setMobileMenuOpen(false); }}
+                                    onClick={() => { void logout(); setMobileMenuOpen(false); }}
                                     className="block w-full text-left py-2 text-sm text-slate-400 hover:text-white transition-colors"
                                 >
                                     Sign Out

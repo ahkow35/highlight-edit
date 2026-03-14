@@ -6,19 +6,16 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,  // send cookies automatically
 });
 
-// Add auth interceptor
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+    (config) => config,
+    (error) => {
+        console.error("Request Error:", error);
+        return Promise.reject(error);
     }
-    return config;
-}, (error) => {
-    console.error("Request Error:", error);
-    return Promise.reject(error);
-});
+);
 
 // Add response interceptor for logging
 api.interceptors.response.use((response) => {
@@ -102,16 +99,14 @@ export interface Template {
 export type TemplateResponse = Template;
 
 export const authApi = {
-    async login(email: string, password: string): Promise<AuthResponse> {
+    async login(email: string, password: string): Promise<void> {
         const params = new URLSearchParams();
         params.append('username', email);
         params.append('password', password);
-        const response = await api.post<AuthResponse>('/auth/login', params, {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+        await api.post('/auth/login', params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         });
-        return response.data;
+        // Token is now in httpOnly cookie — nothing to store
     },
 
     async signup(email: string, password: string, inviteCode: string): Promise<User> {
@@ -122,6 +117,10 @@ export const authApi = {
     async getMe(): Promise<User> {
         const response = await api.get<User>('/auth/me');
         return response.data;
+    },
+
+    async logout(): Promise<void> {
+        await api.post('/auth/logout');
     },
 
     async upgrade(): Promise<User> {

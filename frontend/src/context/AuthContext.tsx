@@ -7,7 +7,7 @@ interface AuthContextType {
     isLoading: boolean;
     login: (email: string, pass: string) => Promise<void>;
     signup: (email: string, pass: string, inviteCode: string) => Promise<void>;
-    logout: () => void;
+    logout: () => Promise<void>;
     upgrade: () => Promise<void>;
 }
 
@@ -17,39 +17,34 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Load user on startup if token exists
+    // Load user on startup — cookie is sent automatically, just call /me
     useEffect(() => {
         const loadUser = async () => {
-            const token = localStorage.getItem('token');
-            if (token) {
-                try {
-                    const profile = await authApi.getMe();
-                    setUser(profile);
-                } catch (error) {
-                    console.error("Failed to load user profile", error);
-                    localStorage.removeItem('token');
-                }
+            try {
+                const profile = await authApi.getMe();
+                setUser(profile);
+            } catch {
+                setUser(null);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         loadUser();
     }, []);
 
     const login = async (email: string, pass: string) => {
-        const { access_token } = await authApi.login(email, pass);
-        localStorage.setItem('token', access_token);
+        await authApi.login(email, pass);
         const profile = await authApi.getMe();
         setUser(profile);
     };
 
     const signup = async (email: string, pass: string, inviteCode: string) => {
         await authApi.signup(email, pass, inviteCode);
-        // Auto login after signup
         await login(email, pass);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
+    const logout = async () => {
+        await authApi.logout();
         setUser(null);
     };
 
@@ -67,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             login,
             signup,
             logout,
-            upgrade
+            upgrade,
         }}>
             {children}
         </AuthContext.Provider>
