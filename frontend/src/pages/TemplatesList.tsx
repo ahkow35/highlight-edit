@@ -64,7 +64,7 @@ const TemplatesList: React.FC = () => {
             </div>
 
             {error && (
-                <div className="bg-red-900/50 border border-red-500 text-red-200 p-4 rounded-lg mb-6">
+                <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg mb-6">
                     {error}
                 </div>
             )}

@@ -50,7 +50,7 @@ function Header() {
                                     My Templates
                                 </Link>
                                 <span className="text-sm text-[#6B7280] truncate max-w-[150px]">
-                                    {user?.email} {user?.is_paid && <span className="text-xs bg-green-900 text-green-300 px-1.5 py-0.5 rounded ml-1">PRO</span>}
+                                    {user?.email} {user?.is_paid && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded ml-1">PRO</span>}
                                 </span>
                                 <button
                                     onClick={() => void logout()}
@@ -100,7 +100,7 @@ function Header() {
                         {isAuthenticated ? (
                             <>
                                 <div className="text-sm text-[#6B7280] truncate py-2">
-                                    {user?.email} {user?.is_paid && <span className="text-xs bg-green-900 text-green-300 px-1.5 py-0.5 rounded ml-1">PRO</span>}
+                                    {user?.email} {user?.is_paid && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded ml-1">PRO</span>}
                                 </div>
                                 {user?.email === ADMIN_EMAIL && (
                                     <Link

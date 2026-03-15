@@ -1,7 +1,6 @@
 """Tests for the footer watermark implementation."""
 import pytest
 from docx import Document
-from docx.shared import Pt
 from app.services.watermark import add_watermark
 
 
