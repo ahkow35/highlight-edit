@@ -1,8 +1,8 @@
 /**
  * DynamicFormGenerator Component
- * 
- * Renders a dynamic form based on detected fields from document processing.
- * Uses React Hook Form for form state management.
+ *
+ * Renders a dynamic form from detected document fields.
+ * Precision Light design system — light theme, yellow accents, SVG icons only.
  */
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -30,6 +30,14 @@ interface FormData {
     [key: string]: string;
 }
 
+const getInputType = (fieldType: string): string => {
+    switch (fieldType) {
+        case 'email': return 'email';
+        case 'phone': return 'tel';
+        default: return 'text';
+    }
+};
+
 export default function DynamicFormGenerator({
     fields,
     templateId,
@@ -40,7 +48,9 @@ export default function DynamicFormGenerator({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [previewMode, setPreviewMode] = useState(false);
     const [outputFormat, setOutputFormat] = useState('docx');
-    const [customFilename, setCustomFilename] = useState(templateId.replace(/\.[^/.]+$/, "") || 'document');
+    const [customFilename, setCustomFilename] = useState(
+        templateId.replace(/\.[^/.]+$/, '') || 'document'
+    );
 
     const {
         register,
@@ -56,6 +66,8 @@ export default function DynamicFormGenerator({
     });
 
     const watchedValues = watch();
+    const filledCount = Object.values(watchedValues).filter(Boolean).length;
+    const progressPct = fields.length > 0 ? (filledCount / fields.length) * 100 : 0;
 
     const handlePreview: SubmitHandler<FormData> = async (data) => {
         setIsSubmitting(true);
@@ -70,293 +82,238 @@ export default function DynamicFormGenerator({
     const handleGenerate: SubmitHandler<FormData> = async (data) => {
         setIsSubmitting(true);
         try {
-            console.log("DEBUG: Generating with format:", outputFormat);
             await onGenerate(data, outputFormat, customFilename);
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const getInputType = (fieldType: string): string => {
-        switch (fieldType) {
-            case 'email':
-                return 'email';
-            case 'phone':
-                return 'tel';
-            case 'number':
-            case 'currency':
-                return 'number';
-            case 'date':
-                return 'text';
-            default:
-                return 'text';
-        }
-    };
-
-    const getFieldIcon = (fieldType: string) => {
-        switch (fieldType) {
-            case 'email':
-                return '✉️';
-            case 'phone':
-                return '📞';
-            case 'date':
-                return '📅';
-            case 'currency':
-                return '💰';
-            case 'number':
-                return '#️⃣';
-            default:
-                return '📝';
-        }
-    };
-
     return (
-        <div
-            className={clsx(
-                'bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden',
-                className
-            )}
-        >
+        <div className={clsx('bg-white border border-[#E4E4E7] rounded-xl overflow-hidden card-highlight', className)}>
+
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <span>📋</span>
-                    Fill in Document Fields
-                </h2>
-                <p className="text-blue-100 text-sm mt-1">
-                    {fields.length} field{fields.length !== 1 ? 's' : ''} detected • Template ID: {templateId.slice(0, 8)}
-                </p>
+            <div className="px-5 py-4 border-b border-[#E4E4E7] bg-[#FAFAFA] flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                    <svg className="w-5 h-5 text-[#CA8A04]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <div>
+                        <h2 className="text-sm font-semibold text-[#09090B] tracking-tight">Fill in Document Fields</h2>
+                        <p className="text-xs text-[#71717A]">
+                            {fields.length} field{fields.length !== 1 ? 's' : ''} detected
+                        </p>
+                    </div>
+                </div>
             </div>
 
             {/* Form */}
-            <form className="p-6 space-y-6">
-                {/* Field List - Single Column for Larger Fields */}
-                <div className="space-y-4">
-                    {fields.map((field, index) => (
-                        <div
-                            key={field.id}
-                            className={clsx(
-                                'animate-fade-in bg-slate-800/50 border border-slate-700 rounded-xl p-5',
-                                'hover:border-slate-600 transition-all duration-200',
-                                'focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500/20'
-                            )}
-                            style={{ animationDelay: `${index * 50}ms` }}
-                        >
-                            {/* Field Header */}
-                            <div className="flex items-start justify-between mb-3">
-                                <label
-                                    htmlFor={`field_${field.id}`}
-                                    className="block text-sm font-medium text-slate-300"
-                                >
-                                    <span className="flex items-center gap-2">
-                                        <span>{getFieldIcon(field.type)}</span>
-                                        <span>Field {field.id}</span>
-                                    </span>
-                                </label>
-                                <span className="text-xs px-2 py-0.5 bg-slate-700 rounded-full text-slate-400 uppercase tracking-wider">
-                                    {field.type}
-                                </span>
-                            </div>
+            <form className="p-5 space-y-4">
 
-                            {/* Original Text (Label) */}
-                            <div className="mb-3 p-2 bg-yellow-400/10 border border-yellow-400/20 rounded-lg">
-                                <span className="text-xs text-yellow-400/70 uppercase tracking-wide">
-                                    Original Highlighted Text:
-                                </span>
-                                <p className="text-yellow-200 font-medium mt-0.5 break-words">
-                                    "{field.original_text}"
-                                </p>
-                            </div>
-
-                            {/* Input Field - Larger */}
-                            <input
-                                type={getInputType(field.type)}
-                                id={`field_${field.id}`}
-                                placeholder={`Enter value to replace: "${field.original_text}"`}
-                                {...register(`field_${field.id}`, {
-                                    required: 'This field is required',
-                                })}
-                                className={clsx(
-                                    'w-full px-4 py-4 bg-slate-900 border rounded-lg text-lg',
-                                    'text-white placeholder-slate-500',
-                                    'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-                                    'transition-all duration-200',
-                                    errors[`field_${field.id}`]
-                                        ? 'border-red-500'
-                                        : 'border-slate-600 hover:border-slate-500'
-                                )}
-                            />
-
-                            {/* Error Message */}
-                            {errors[`field_${field.id}`] && (
-                                <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
-                                    <span>⚠️</span>
-                                    {errors[`field_${field.id}`]?.message}
-                                </p>
-                            )}
-
-                            {/* Location Info */}
-                            {(field.page || field.paragraph) && (
-                                <p className="mt-2 text-xs text-slate-500">
-                                    {field.page && `Page ${field.page}`}
-                                    {field.page && field.paragraph && ' • '}
-                                    {field.paragraph && `Paragraph ${field.paragraph}`}
-                                </p>
-                            )}
+                {/* Field list */}
+                {fields.map((field, index) => (
+                    <div
+                        key={field.id}
+                        className={clsx(
+                            'animate-fade-in border border-[#E4E4E7] rounded-lg p-4',
+                            'hover:border-[#CA8A04] transition-all duration-150',
+                            'focus-within:border-[#CA8A04] focus-within:ring-1 focus-within:ring-[#FFE033]/40'
+                        )}
+                        style={{ animationDelay: `${index * 40}ms` }}
+                    >
+                        {/* Label + type badge */}
+                        <div className="flex items-center justify-between mb-2">
+                            <label
+                                htmlFor={`field_${field.id}`}
+                                className="text-sm font-semibold text-[#09090B] tracking-tight leading-tight"
+                            >
+                                {field.original_text}
+                            </label>
+                            <span className="text-xs px-2 py-0.5 bg-[#F4F4F5] text-[#71717A] rounded-full uppercase tracking-wider font-medium flex-shrink-0 ml-2">
+                                {field.type}
+                            </span>
                         </div>
-                    ))}
-                </div>
 
-                {/* Empty State */}
+                        {/* Context preview */}
+                        <div className="mb-3 px-3 py-2 bg-[#FFFDF0] border border-[#FFE033]/30 rounded-md">
+                            <span className="text-xs text-[#71717A] uppercase tracking-wide block mb-0.5">
+                                Replacing
+                            </span>
+                            <p className="text-sm text-[#CA8A04] font-medium break-words">
+                                "{field.original_text}"
+                            </p>
+                        </div>
+
+                        {/* Input */}
+                        <input
+                            type={getInputType(field.type)}
+                            id={`field_${field.id}`}
+                            placeholder="Enter value…"
+                            {...register(`field_${field.id}`, { required: 'This field is required' })}
+                            className={clsx(
+                                'w-full px-4 py-3 bg-white border rounded-lg text-sm text-[#09090B] placeholder:text-[#71717A]',
+                                'focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40 focus:border-[#CA8A04]',
+                                'hover:border-[#CA8A04] transition-all duration-150',
+                                errors[`field_${field.id}`] ? 'border-[#EF4444]' : 'border-[#E4E4E7]'
+                            )}
+                        />
+
+                        {/* Error */}
+                        {errors[`field_${field.id}`] && (
+                            <p className="mt-1.5 text-xs text-[#EF4444]">
+                                {errors[`field_${field.id}`]?.message}
+                            </p>
+                        )}
+
+                        {/* Location badge */}
+                        {(field.page || field.paragraph) && (
+                            <p className="mt-1.5 text-xs text-[#71717A]">
+                                {field.page && `Page ${field.page}`}
+                                {field.page && field.paragraph && ' · '}
+                                {field.paragraph && `¶${field.paragraph}`}
+                            </p>
+                        )}
+                    </div>
+                ))}
+
+                {/* Empty state */}
                 {fields.length === 0 && (
-                    <div className="text-center py-12">
-                        <div className="text-6xl mb-4">📄</div>
-                        <h3 className="text-xl font-medium text-slate-300 mb-2">
-                            No Fields Detected
-                        </h3>
-                        <p className="text-slate-500">
+                    <div className="text-center py-16 px-6">
+                        <div className="w-14 h-14 bg-[#F4F4F5] rounded-xl flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-7 h-7 text-[#71717A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-sm font-semibold text-[#09090B] tracking-tight mb-1">No fields detected</h3>
+                        <p className="text-xs text-[#71717A]">
                             Upload a document with yellow highlighted text to get started.
                         </p>
                     </div>
                 )}
 
-                {/* Action Buttons */}
+                {/* Actions */}
                 {fields.length > 0 && (
-                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-700">
-                        {/* Preview Button */}
-                        <button
-                            type="button"
-                            onClick={handleSubmit(handlePreview)}
-                            disabled={isSubmitting || !isDirty}
-                            className={clsx(
-                                'flex-1 px-6 py-3 rounded-xl font-semibold text-sm',
-                                'flex items-center justify-center gap-2',
-                                'transition-all duration-200',
-                                isSubmitting || !isDirty
-                                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                                    : 'bg-slate-700 text-white hover:bg-slate-600 active:scale-[0.98]'
-                            )}
-                        >
-                            {isSubmitting && previewMode ? (
-                                <>
-                                    <span className="animate-spin">⏳</span>
-                                    Generating Preview...
-                                </>
-                            ) : (
-                                <>
-                                    <span>👁️</span>
-                                    Preview Document
-                                </>
-                            )}
-                        </button>
+                    <div className="pt-4 border-t border-[#E4E4E7] space-y-3">
 
-                        {/* Generate Button */}
-                        <button
-                            type="button"
-                            onClick={handleSubmit(handleGenerate)}
-                            disabled={isSubmitting}
-                            className={clsx(
-                                'flex-1 px-6 py-3 rounded-xl font-semibold text-sm',
-                                'flex items-center justify-center gap-2',
-                                'transition-all duration-200',
-                                isSubmitting
-                                    ? 'bg-blue-700/50 text-blue-300 cursor-not-allowed'
-                                    : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white',
-                                'hover:from-blue-500 hover:to-indigo-500 active:scale-[0.98]',
-                                'shadow-lg shadow-blue-500/20'
-                            )}
-                        >
-                            {isSubmitting && !previewMode ? (
-                                <>
-                                    <span className="animate-spin">⏳</span>
-                                    Generating...
-                                </>
-                            ) : (
-                                <>
-                                    <span>📥</span>
-                                    Generate {outputFormat === 'pdf' ? 'PDF' : 'Word'} Document
-                                </>
-                            )}
-                        </button>
+                        {/* Format toggle */}
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs font-medium text-[#71717A]">Format:</span>
+                            <div className="flex bg-[#F4F4F5] rounded-md p-0.5 border border-[#E4E4E7]">
+                                <button
+                                    type="button"
+                                    onClick={() => setOutputFormat('docx')}
+                                    className={clsx(
+                                        'px-3 py-1.5 rounded text-xs font-semibold transition-all',
+                                        outputFormat === 'docx'
+                                            ? 'bg-white text-[#09090B] shadow-sm border border-[#E4E4E7]'
+                                            : 'text-[#71717A] hover:text-[#09090B]'
+                                    )}
+                                >
+                                    Word (.docx)
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setOutputFormat('pdf')}
+                                    className={clsx(
+                                        'px-3 py-1.5 rounded text-xs font-semibold transition-all',
+                                        outputFormat === 'pdf'
+                                            ? 'bg-white text-[#09090B] shadow-sm border border-[#E4E4E7]'
+                                            : 'text-[#71717A] hover:text-[#09090B]'
+                                    )}
+                                >
+                                    PDF (.pdf)
+                                </button>
+                            </div>
+                        </div>
 
-                        <div className="w-full sm:w-auto">
-                            <label className="block text-xs text-slate-400 mb-1 ml-1">Filename</label>
+                        {/* Filename */}
+                        <div>
+                            <label className="block text-xs font-medium text-[#71717A] mb-1">Filename</label>
                             <input
                                 type="text"
                                 value={customFilename}
                                 onChange={(e) => setCustomFilename(e.target.value)}
-                                className="w-full sm:w-64 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                                placeholder="Filename"
+                                className="w-full px-3 py-2 bg-white border border-[#E4E4E7] rounded-md text-sm text-[#09090B] placeholder:text-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40 focus:border-[#CA8A04] hover:border-[#CA8A04] transition-all"
+                                placeholder="Document filename"
                             />
                         </div>
 
-                        {/* Format Selection - Replaced dropdown with distinct buttons */}
-                        <div className="flex bg-slate-800 rounded-xl p-1 border border-slate-700">
+                        {/* Buttons — stacked on mobile, row on sm+ */}
+                        <div className="flex flex-col sm:flex-row gap-2">
                             <button
                                 type="button"
-                                onClick={() => setOutputFormat('docx')}
+                                onClick={handleSubmit(handlePreview)}
+                                disabled={isSubmitting || !isDirty}
                                 className={clsx(
-                                    'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200',
-                                    outputFormat === 'docx'
-                                        ? 'bg-blue-600 text-white shadow-lg'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                                    'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors',
+                                    isSubmitting || !isDirty
+                                        ? 'bg-[#F4F4F5] text-[#71717A] cursor-not-allowed'
+                                        : 'bg-white border border-[#E4E4E7] text-[#09090B] hover:border-[#CA8A04] hover:bg-[#FAFAFA]'
                                 )}
                             >
-                                Word (.docx)
+                                {isSubmitting && previewMode ? (
+                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                )}
+                                Preview
                             </button>
+
                             <button
                                 type="button"
-                                onClick={() => setOutputFormat('pdf')}
+                                onClick={handleSubmit(handleGenerate)}
+                                disabled={isSubmitting}
                                 className={clsx(
-                                    'px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200',
-                                    outputFormat === 'pdf'
-                                        ? 'bg-red-600 text-white shadow-lg'
-                                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+                                    'flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-md text-sm font-medium transition-colors',
+                                    isSubmitting
+                                        ? 'bg-[#27272A] text-white/60 cursor-not-allowed'
+                                        : 'bg-[#18181B] hover:bg-[#27272A] text-white'
                                 )}
                             >
-                                PDF (.pdf)
+                                {isSubmitting && !previewMode ? (
+                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                    </svg>
+                                ) : (
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                )}
+                                Generate {outputFormat === 'pdf' ? 'PDF' : 'Word'}
                             </button>
                         </div>
-                    </div>
-                )}
 
-                {/* Reset Button */}
-                {fields.length > 0 && isDirty && (
-                    <div className="text-center">
-                        <button
-                            type="button"
-                            onClick={() => reset()}
-                            className="text-sm text-slate-500 hover:text-slate-300 transition-colors"
-                        >
-                            Reset all fields
-                        </button>
+                        {/* Reset */}
+                        {isDirty && (
+                            <button
+                                type="button"
+                                onClick={() => reset()}
+                                className="w-full text-xs text-[#71717A] hover:text-[#09090B] transition-colors py-1 text-center"
+                            >
+                                Reset all fields
+                            </button>
+                        )}
                     </div>
                 )}
             </form>
 
-            {/* Summary Footer */}
+            {/* Progress footer */}
             {fields.length > 0 && (
-                <div className="px-6 py-4 bg-slate-800/50 border-t border-slate-700">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-400">
-                            {Object.values(watchedValues).filter(Boolean).length} of {fields.length} fields filled
-                        </span>
-                        <div className="flex gap-4 text-slate-500">
-                            {fields.some(f => f.type === 'date') && (
-                                <span>📅 {fields.filter(f => f.type === 'date').length} dates</span>
-                            )}
-                            {fields.some(f => f.type === 'email') && (
-                                <span>✉️ {fields.filter(f => f.type === 'email').length} emails</span>
-                            )}
-                        </div>
+                <div className="px-5 py-4 bg-[#FAFAFA] border-t border-[#E4E4E7]">
+                    <div className="flex items-center justify-between text-xs text-[#71717A] mb-2">
+                        <span>{filledCount} of {fields.length} fields filled</span>
+                        <span>{Math.round(progressPct)}%</span>
                     </div>
-                    {/* Progress Bar */}
-                    <div className="mt-3 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-[#E4E4E7] rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-300"
-                            style={{
-                                width: `${(Object.values(watchedValues).filter(Boolean).length / fields.length) * 100}%`,
-                            }}
+                            className="h-full bg-[#FFE033] rounded-full transition-all duration-300"
+                            style={{ width: `${progressPct}%` }}
                         />
                     </div>
                 </div>

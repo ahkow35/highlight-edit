@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
 
     return (
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-8">
-            <h1 className="text-2xl font-bold text-white">📊 Analytics Dashboard</h1>
+            <h1 className="text-2xl font-bold text-white">Analytics Dashboard</h1>
 
             {/* Overview Cards */}
             {overview && (

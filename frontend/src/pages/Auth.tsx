@@ -35,122 +35,148 @@ const AuthPage: React.FC = () => {
             } else {
                 await signup(email, password, inviteCode);
             }
-            navigate('/'); // Go home after auth
+            navigate('/');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Authentication failed');
         }
     };
 
+    const inputClass = "w-full px-4 py-3 bg-white border border-[#E4E4E7] rounded-lg text-sm text-[#09090B] placeholder-[#A1A1AA] focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40 focus:border-[#CA8A04] hover:border-[#CA8A04] transition-colors";
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-[#FAF9F6] p-8 rounded-lg shadow-sm border border-[#E5E7EB] card-highlight">
-                <div className="flex justify-center mb-4">
-                    <Logo size={64} />
-                </div>
-                <div>
-                    <h2 className="mt-6 text-center text-3xl font-extrabold text-[#111827]">
-                        {isLogin ? 'Sign in to your account' : 'Create a new account'}
-                    </h2>
-                    {!isLogin && (
-                        <p className="mt-2 text-center text-sm text-gray-600">
-                            Beta access requires an invite code
-                        </p>
-                    )}
-                </div>
-                <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] py-12 px-4">
+            <div className="w-full max-w-md">
+                {/* Card */}
+                <div className="bg-white border border-[#E4E4E7] rounded-xl p-8 card-highlight">
+                    {/* Logo */}
+                    <div className="flex justify-center mb-6">
+                        <Logo size={48} />
+                    </div>
+
+                    {/* Heading */}
+                    <div className="text-center mb-6">
+                        <h1 className="text-xl font-semibold text-[#09090B] tracking-tight">
+                            {isLogin ? 'Sign in to HighlightEdit' : 'Create your account'}
+                        </h1>
+                        {!isLogin && (
+                            <p className="mt-1.5 text-sm text-[#71717A]">
+                                Beta access requires an invite code
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Error */}
                     {error && (
-                        <div className="bg-red-50 text-red-500 p-3 rounded text-sm">
-                            {error}
+                        <div className="flex items-start gap-3 px-4 py-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg mb-5">
+                            <svg className="w-4 h-4 text-[#EF4444] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <p className="text-sm text-[#EF4444]">{error}</p>
                         </div>
                     )}
-                    <div className="rounded-md shadow-sm -space-y-px">
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Email */}
                         <div>
+                            <label htmlFor="email" className="block text-xs font-medium text-[#71717A] mb-1.5">
+                                Email address
+                            </label>
                             <input
                                 id="email"
                                 name="email"
-                                autoComplete="email"
                                 type="email"
+                                autoComplete="email"
                                 required
-                                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-[#FFE033] focus:border-[#FFE033] focus:z-10 sm:text-sm"
-                                placeholder="Email address"
+                                className={inputClass}
+                                placeholder="you@company.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />
                         </div>
+
+                        {/* Password */}
                         <div>
+                            <label htmlFor="password" className="block text-xs font-medium text-[#71717A] mb-1.5">
+                                Password
+                            </label>
                             <input
                                 id="password"
                                 name="password"
-                                autoComplete={isLogin ? "current-password" : "new-password"}
                                 type="password"
+                                autoComplete={isLogin ? 'current-password' : 'new-password'}
                                 required
-                                className={`appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 ${isLogin ? 'rounded-b-md' : ''} focus:outline-none focus:ring-[#FFE033] focus:border-[#FFE033] focus:z-10 sm:text-sm`}
-                                placeholder="Password"
+                                className={inputClass}
+                                placeholder="••••••••"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
+
+                        {/* Invite code (signup only) */}
                         {!isLogin && (
                             <div>
+                                <label htmlFor="invite_code" className="block text-xs font-medium text-[#71717A] mb-1.5">
+                                    Invite code
+                                </label>
                                 <input
+                                    id="invite_code"
                                     type="text"
                                     required
-                                    className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-[#FFE033] focus:border-[#FFE033] focus:z-10 sm:text-sm"
-                                    placeholder="Invite code"
+                                    className={inputClass}
+                                    placeholder="Enter your invite code"
                                     value={inviteCode}
                                     onChange={(e) => setInviteCode(e.target.value)}
                                 />
                             </div>
                         )}
-                    </div>
 
-                    {isLogin && (
-                        <div className="flex items-center justify-between mt-4">
-                            <div className="flex items-center">
-                                <input
-                                    id="remember_me"
-                                    name="remember_me"
-                                    type="checkbox"
-                                    className="h-4 w-4 text-[#CA8A04] focus:ring-[#FFE033] border-gray-300 rounded"
-                                    checked={rememberEmail}
-                                    onChange={(e) => setRememberEmail(e.target.checked)}
-                                />
-                                <label htmlFor="remember_me" className="ml-2 block text-sm text-gray-900">
-                                    Remember my email
+                        {/* Remember me + Forgot password */}
+                        {isLogin && (
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                        id="remember_me"
+                                        name="remember_me"
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-[#E4E4E7] text-[#CA8A04] focus:ring-[#FFE033]/40"
+                                        checked={rememberEmail}
+                                        onChange={(e) => setRememberEmail(e.target.checked)}
+                                    />
+                                    <span className="text-xs text-[#71717A]">Remember my email</span>
                                 </label>
-                            </div>
-
-                            <div className="text-sm">
                                 <button
                                     type="button"
                                     onClick={() => navigate('/forgot-password')}
-                                    className="font-medium text-[#CA8A04] hover:text-[#A16207]"
+                                    className="text-xs font-medium text-[#CA8A04] hover:text-[#A16207] transition-colors"
                                 >
-                                    Forgot your password?
+                                    Forgot password?
                                 </button>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    <div>
+                        {/* Submit */}
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#1A1A1A] hover:bg-[#333] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFE033]"
+                            className="w-full py-2.5 px-4 bg-[#18181B] hover:bg-[#27272A] text-white text-sm font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40"
                         >
-                            {isLogin ? 'Sign in' : 'Sign up'}
+                            {isLogin ? 'Sign in' : 'Create account'}
                         </button>
-                    </div>
-                </form>
-                <div className="text-center">
-                    <button
-                        className="text-sm text-[#CA8A04] hover:text-[#A16207]"
-                        onClick={() => setIsLogin(!isLogin)}
-                    >
-                        {isLogin ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
-                    </button>
+                    </form>
                 </div>
-            </div >
-        </div >
+
+                {/* Toggle */}
+                <p className="text-center text-sm text-[#71717A] mt-4">
+                    {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
+                    <button
+                        onClick={() => { setIsLogin(!isLogin); setError(''); }}
+                        className="font-medium text-[#CA8A04] hover:text-[#A16207] transition-colors"
+                    >
+                        {isLogin ? 'Sign up' : 'Sign in'}
+                    </button>
+                </p>
+            </div>
+        </div>
     );
 };
 

@@ -11,6 +11,7 @@ import { FieldRow } from '../components/FieldRow';
 import { useAuth } from '../context/AuthContext';
 import InstructionsEmptyState from '../components/InstructionsEmptyState';
 import UsageIndicator from '../components/UsageIndicator';
+import UseCasesSection from '../components/UseCasesSection';
 
 interface FormData {
     [key: string]: string;
@@ -308,7 +309,7 @@ export default function TemplateEditor() {
     };
 
     return (
-        <div className="max-w-3xl mx-auto px-6">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
             {/* Usage Indicator for free users */}
             <div className="mb-6">
                 <UsageIndicator />
@@ -316,23 +317,38 @@ export default function TemplateEditor() {
 
             {/* Error Banner */}
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between">
-                    <p className="text-red-600 text-sm">{error}</p>
-                    <button onClick={() => setError(null)} className="text-red-400 hover:text-red-600">✕</button>
+                <div className="mb-6 flex items-start gap-3 px-4 py-3 bg-[#FEF2F2] border border-[#FECACA] rounded-lg">
+                    <svg className="w-4 h-4 text-[#EF4444] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-sm text-[#EF4444] flex-1">{error}</p>
+                    <button onClick={() => setError(null)} className="text-[#EF4444] hover:opacity-70 flex-shrink-0">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
             )}
 
             {/* Loading State for Template from URL */}
             {isUploading && location.search.includes('templateId') && (
-                <div className="mb-6 p-8 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#FFE033] mx-auto mb-4"></div>
-                    <p className="text-[#6B7280]">Loading template...</p>
+                <div className="mb-6 py-16 text-center">
+                    <svg className="w-8 h-8 animate-spin text-[#CA8A04] mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    <p className="text-sm text-[#71717A]">Loading template…</p>
                 </div>
             )}
 
             {/* Empty State Instructions */}
             {!templateState && !location.search.includes('templateId') && (
                 <InstructionsEmptyState />
+            )}
+
+            {/* Use Cases */}
+            {!templateState && !location.search.includes('templateId') && (
+                <UseCasesSection />
             )}
 
             {/* Upload State - only show when not loading a template from URL */}
@@ -352,22 +368,31 @@ export default function TemplateEditor() {
                     <input {...getInputProps()} />
 
                     <div className="flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 rounded-full bg-[#F3F4F6] flex items-center justify-center">
-                            <span className="text-3xl">📄</span>
+                        <div className={`w-14 h-14 rounded-xl flex items-center justify-center transition-colors ${isDragActive ? 'bg-[#FFE033]' : 'bg-[#F4F4F5]'}`}>
+                            {isUploading ? (
+                                <svg className="w-7 h-7 animate-spin text-[#CA8A04]" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                </svg>
+                            ) : (
+                                <svg className={`w-7 h-7 ${isDragActive ? 'text-[#09090B]' : 'text-[#71717A]'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                </svg>
+                            )}
                         </div>
 
                         {isUploading ? (
-                            <div>
-                                <p className="text-lg font-medium text-[#111827]">Processing document...</p>
-                                <p className="text-sm text-[#6B7280] mt-1">Detecting highlighted fields</p>
+                            <div className="text-center">
+                                <p className="text-sm font-semibold text-[#09090B] tracking-tight">Processing document…</p>
+                                <p className="text-xs text-[#71717A] mt-1">Detecting highlighted fields</p>
                             </div>
                         ) : (
-                            <div>
-                                <p className="text-lg font-medium text-[#111827]">
-                                    Drop your document here
+                            <div className="text-center">
+                                <p className="text-sm font-semibold text-[#09090B] tracking-tight">
+                                    {isDragActive ? 'Drop it here' : 'Drop your document here'}
                                 </p>
-                                <p className="text-sm text-[#6B7280] mt-1">
-                                    Supports Word (.docx)
+                                <p className="text-xs text-[#71717A] mt-1">
+                                    Supports Word (.docx) with <span className="bg-[#FFE033] px-1 rounded font-medium text-[#09090B]">yellow highlights</span>
                                 </p>
                             </div>
                         )}
@@ -377,15 +402,15 @@ export default function TemplateEditor() {
 
             {/* Template Editor - Document Card */}
             {templateState && templateState.fields && templateState.fields.length > 0 && (
-                <div className="card-highlight bg-[#FAF9F6] rounded-2xl border border-[#E5E7EB] overflow-hidden shadow-sm">
+                <div className="card-highlight bg-white rounded-xl border border-[#E4E4E7] overflow-hidden">
                     {/* Card Header */}
-                    <div className="px-8 py-6 border-b border-[#E5E7EB] bg-[#FAF9F6]">
+                    <div className="px-6 py-5 border-b border-[#E4E4E7] bg-[#FAFAFA]">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h1 className="text-xl font-semibold text-[#111827]">
+                                <h1 className="text-base font-semibold text-[#09090B] tracking-tight">
                                     {templateState.original_file_path}
                                 </h1>
-                                <p className="text-sm text-[#6B7280] mt-1">
+                                <p className="text-xs text-[#71717A] mt-0.5">
                                     {templateState.fields?.length || 0} field{(templateState.fields?.length || 0) !== 1 ? 's' : ''} to complete
                                 </p>
                             </div>
@@ -393,42 +418,45 @@ export default function TemplateEditor() {
                                 <button
                                     onClick={handleSaveTemplate}
                                     type="button"
-                                    className="text-sm font-medium text-[#CA8A04] hover:text-[#A16207] transition-colors flex items-center gap-1"
+                                    className="text-sm font-medium text-[#CA8A04] hover:text-[#A16207] transition-colors flex items-center gap-1.5"
                                 >
-                                    <span>💾</span> Save to Library
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                                    </svg>
+                                    Save to Library
                                 </button>
                                 <button
                                     onClick={handleNewFile}
-                                    className="text-sm text-[#6B7280] hover:text-[#111827] transition-colors"
+                                    className="text-[#71717A] hover:text-[#09090B] transition-colors"
+                                    aria-label="Close"
                                 >
-                                    ✕ Close
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
 
-                        {/* Save Status Indicator + Clear Form */}
+                        {/* Save Status + Clear Form */}
                         <div className="flex items-center justify-between mt-3">
-                            {/* Auto-save status */}
-                            <div className="h-5">
+                            <div className="h-4">
                                 {saveStatus === 'saving' && (
-                                    <span className="text-xs text-[#9CA3AF] flex items-center gap-1.5 animate-pulse">
-                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                                    <span className="text-xs text-[#71717A] flex items-center gap-1.5 animate-pulse">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#F59E0B]" />
                                         Saving…
                                     </span>
                                 )}
                                 {saveStatus === 'saved' && (
-                                    <span className="text-xs text-emerald-400 flex items-center gap-1.5 transition-opacity duration-500">
-                                        <span>✓</span>
+                                    <span className="text-xs text-[#16A34A] flex items-center gap-1.5">
+                                        <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#16A34A]" />
                                         Saved
                                     </span>
                                 )}
                             </div>
-
-                            {/* Clear Form */}
                             <button
                                 type="button"
                                 onClick={() => setShowClearConfirm(true)}
-                                className="text-xs text-[#9CA3AF] hover:text-red-500 transition-colors"
+                                className="text-xs text-[#71717A] hover:text-[#EF4444] transition-colors"
                             >
                                 Clear Form
                             </button>
@@ -437,18 +465,18 @@ export default function TemplateEditor() {
 
                     {/* Clear Confirmation Banner */}
                     {showClearConfirm && (
-                        <div className="px-8 py-3 bg-red-50 border-b border-red-200 flex items-center justify-between">
-                            <p className="text-sm text-red-600">Clear all fields? This cannot be undone.</p>
+                        <div className="px-6 py-3 bg-[#FEF2F2] border-b border-[#FECACA] flex items-center justify-between">
+                            <p className="text-sm text-[#EF4444]">Clear all fields? This cannot be undone.</p>
                             <div className="flex items-center gap-3">
                                 <button
                                     onClick={() => setShowClearConfirm(false)}
-                                    className="text-xs text-[#6B7280] hover:text-[#111827] transition-colors"
+                                    className="text-xs text-[#71717A] hover:text-[#09090B] transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     onClick={handleClearForm}
-                                    className="text-xs font-semibold text-red-400 hover:text-red-300 transition-colors"
+                                    className="text-xs font-semibold text-[#EF4444] hover:opacity-70 transition-opacity"
                                 >
                                     Yes, clear
                                 </button>
@@ -457,8 +485,8 @@ export default function TemplateEditor() {
                     )}
 
                     {/* Form Fields */}
-                    <form onSubmit={handleSubmit(handleGenerate)} className="px-8 py-6">
-                        <div className="space-y-6">
+                    <form onSubmit={handleSubmit(handleGenerate)} className="px-6 py-5">
+                        <div className="space-y-5">
                             {templateState.fields.map((field) => (
                                 <FieldRow
                                     key={field.id}
@@ -473,87 +501,94 @@ export default function TemplateEditor() {
                             ))}
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-[#E5E7EB] space-y-6">
-                            {/* Format Selection - Prominent */}
+                        <div className="mt-6 pt-5 border-t border-[#E4E4E7] space-y-5">
+                            {/* Format Selection */}
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                                <label className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
                                     1. Select Output Format
                                 </label>
-                                <div className="flex bg-[#F3F4F6] rounded-xl p-1.5 border border-[#E5E7EB] self-start">
+                                <div className="flex bg-[#F4F4F5] rounded-lg p-1 border border-[#E4E4E7] self-start">
                                     <button
                                         type="button"
                                         onClick={() => setOutputFormat('docx')}
                                         className={`
-                                            px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2
+                                            px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2
                                             ${outputFormat === 'docx'
-                                                ? 'bg-[#1A1A1A] text-white shadow-lg border border-[#FFE033]'
-                                                : 'text-[#6B7280] hover:text-[#111827] hover:bg-white'}
+                                                ? 'bg-[#18181B] text-white shadow-sm border border-[#FFE033]'
+                                                : 'text-[#71717A] hover:text-[#09090B] hover:bg-white'}
                                         `}
                                     >
-                                        <span>📝</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
                                         Word (.docx)
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setOutputFormat('pdf')}
                                         className={`
-                                            px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 flex items-center gap-2
+                                            px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center gap-2
                                             ${outputFormat === 'pdf'
-                                                ? 'bg-[#1A1A1A] text-white shadow-lg border border-[#FFE033]'
-                                                : 'text-[#6B7280] hover:text-[#111827] hover:bg-white'}
+                                                ? 'bg-[#18181B] text-white shadow-sm border border-[#FFE033]'
+                                                : 'text-[#71717A] hover:text-[#09090B] hover:bg-white'}
                                         `}
                                     >
-                                        <span>📄</span>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
                                         PDF (.pdf)
                                     </button>
                                 </div>
                             </div>
 
                             {/* Filename Input */}
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
                                     2. Filename (Optional)
                                 </label>
                                 <input
                                     type="text"
                                     value={customFilename}
                                     onChange={(e) => setCustomFilename(e.target.value)}
-                                    className="w-full px-4 py-2.5 bg-white border border-[#D1D5DB] rounded-lg text-sm text-[#111827] placeholder-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#FFE033] focus:border-transparent transition-all duration-200"
+                                    className="w-full px-4 py-2.5 bg-white border border-[#E4E4E7] rounded-lg text-sm text-[#09090B] placeholder:text-[#71717A] focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40 focus:border-[#CA8A04] hover:border-[#CA8A04] transition-all"
                                     placeholder="e.g. MyContract"
                                 />
                             </div>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex flex-col gap-2 w-full">
-                                    <label className="text-sm font-medium text-[#6B7280] uppercase tracking-wider">
-                                        3. Generate
-                                    </label>
-                                    <div className="flex items-center justify-end gap-4">
-                                        <button
-                                            type="submit"
-                                            disabled={isGenerating}
-                                            className={`
-                                                px-6 py-4 rounded-xl font-bold text-base
-                                                bg-[#1A1A1A] hover:bg-[#333] text-white
-                                                focus:outline-none focus:ring-2 focus:ring-[#FFE033] focus:ring-offset-2 focus:ring-offset-white
-                                                transition-all duration-150
-                                                disabled:opacity-50 disabled:cursor-not-allowed
-                                                shadow-lg flex-grow max-w-sm flex justify-center
-                                            `}
-                                        >
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-medium text-[#71717A] uppercase tracking-wider">
+                                    3. Generate
+                                </label>
+                                <div>
+                                    <button
+                                        type="submit"
+                                        disabled={isGenerating}
+                                        className={`
+                                            w-full sm:w-auto px-6 py-3 rounded-lg font-semibold text-sm
+                                            bg-[#18181B] hover:bg-[#27272A] text-white
+                                            focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40
+                                            transition-all duration-150
+                                            disabled:opacity-50 disabled:cursor-not-allowed
+                                            flex items-center justify-center gap-2
+                                        `}
+                                    >
                                             {isGenerating ? (
                                                 <span className="flex items-center gap-2">
-                                                    <span className="animate-spin">⏳</span>
-                                                    Generating {outputFormat === 'pdf' ? 'PDF' : 'DOCX'}...
+                                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                    </svg>
+                                                    Generating {outputFormat === 'pdf' ? 'PDF' : 'DOCX'}…
                                                 </span>
                                             ) : (
                                                 <span className="flex items-center gap-2">
-                                                    <span>📥</span>
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                    </svg>
                                                     Download {outputFormat === 'pdf' ? 'PDF' : 'Word Doc'}
                                                 </span>
                                             )}
-                                        </button>
-                                    </div>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -563,20 +598,22 @@ export default function TemplateEditor() {
 
             {/* No Fields State */}
             {templateState && templateState.fields && templateState.fields.length === 0 && (
-                <div className="card-highlight bg-[#FAF9F6] rounded-2xl border border-[#E5E7EB] p-12 text-center shadow-sm">
-                    <div className="w-16 h-16 rounded-full bg-[#F3F4F6] flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">🔍</span>
+                <div className="card-highlight bg-white rounded-xl border border-[#E4E4E7] p-12 text-center">
+                    <div className="w-14 h-14 bg-[#FFFDF0] rounded-xl flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-7 h-7 text-[#CA8A04]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
                     </div>
-                    <h2 className="text-xl font-semibold text-[#111827] mb-2">
+                    <h2 className="text-base font-semibold text-[#09090B] tracking-tight mb-1.5">
                         No highlighted fields found
                     </h2>
-                    <p className="text-[#6B7280] mb-6 max-w-md mx-auto">
+                    <p className="text-sm text-[#71717A] mb-6 max-w-sm mx-auto">
                         We couldn't detect any yellow-highlighted text in your document.
-                        Make sure to highlight the fields you want to make editable.
+                        Make sure to highlight the fields you want to make editable in yellow.
                     </p>
                     <button
                         onClick={handleNewFile}
-                        className="px-6 py-3 bg-[#1A1A1A] hover:bg-[#333] text-white font-medium rounded-xl transition-colors"
+                        className="px-4 py-2.5 bg-[#18181B] hover:bg-[#27272A] text-white text-sm font-medium rounded-md transition-colors"
                     >
                         Try another file
                     </button>

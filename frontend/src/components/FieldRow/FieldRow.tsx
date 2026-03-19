@@ -51,14 +51,14 @@ export default function FieldRow({
                 {/* Primary Label - Original Text */}
                 <label
                     htmlFor={fieldName}
-                    className="text-base font-semibold text-[#111827] leading-tight"
+                    className="text-sm font-semibold text-[#09090B] tracking-tight leading-tight"
                 >
                     {originalText}
                 </label>
 
                 {/* Location Badge */}
                 {(paragraph || page) && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#F3F4F6] text-[#6B7280]">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-[#F4F4F5] text-[#71717A]">
                         {page && `Page ${page}`}
                         {page && paragraph && ' · '}
                         {paragraph && `¶${paragraph}`}
@@ -87,13 +87,13 @@ export default function FieldRow({
                     w-full px-4 py-3
                     bg-white
                     border rounded-lg
-                    text-[#111827] text-base
-                    placeholder:text-[#9CA3AF]
-                    transition-all duration-150
-                    focus:outline-none focus:ring-2 focus:ring-[#FFE033] focus:border-transparent focus:bg-[#FFFDF0]
+                    text-[#09090B] text-sm
+                    placeholder:text-[#A1A1AA]
+                    transition-colors duration-150
+                    focus:outline-none focus:ring-2 focus:ring-[#FFE033]/40 focus:border-[#CA8A04] focus:bg-[#FFFDF0]
                     ${hasError
-                        ? 'border-red-300 focus:ring-red-400'
-                        : 'border-[#D1D5DB] hover:border-[#FFE033]'
+                        ? 'border-[#FECACA] focus:ring-red-400/40'
+                        : 'border-[#E4E4E7] hover:border-[#CA8A04]'
                     }
                 `}
             />

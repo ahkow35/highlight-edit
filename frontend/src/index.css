@@ -8,17 +8,24 @@
 
 /* Base Styles */
 :root {
-  /* Light theme palette */
-  --color-bg: #F9FAFB;
+  /* Precision Light — design tokens */
+  --color-bg: #FAFAFA;
   --color-surface: #FFFFFF;
-  --color-border: #E5E7EB;
-  --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
-  --color-yellow: #FFE033;
-  --color-yellow-dark: #CA8A04;
-  --color-black: #1A1A1A;
-  --shadow-card: 0 1px 3px rgba(0,0,0,0.06);
+  --color-border: #E4E4E7;
+  --color-text-primary: #09090B;
+  --color-text-secondary: #71717A;
+  --color-text-tertiary: #A1A1AA;
+  --color-accent: #FFE033;
+  --color-accent-dark: #CA8A04;
+  --color-cta: #18181B;
+  --color-cta-hover: #27272A;
+  --color-error: #EF4444;
+  --color-error-bg: #FEF2F2;
+  --color-success: #16A34A;
+  --color-success-bg: #F0FDF4;
+  --radius-sm: 6px;
+  --radius-base: 8px;
+  --radius-lg: 12px;
 
   /* Keep these for admin/analytics dark pages */
   --color-slate-950: #020617;
@@ -48,6 +55,8 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text-primary);
   line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Custom Scrollbar */
@@ -86,10 +95,12 @@ body {
 @keyframes fadeIn {
   from {
     opacity: 0;
+    transform: translateY(8px);
   }
 
   to {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -105,15 +116,27 @@ body {
   }
 }
 
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .animate-fade-in {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s ease-out forwards;
 }
 
 .animate-slide-up {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.3s ease-out forwards;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #E4E4E7 25%, #F4F4F5 50%, #E4E4E7 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-base);
 }
 
 /* Yellow-bar card motif — echoes the highlight bar in the logo */
 .card-highlight {
-  border-top: 4px solid #FFE033;
+  border-top: 4px solid var(--color-accent) !important;
 }
