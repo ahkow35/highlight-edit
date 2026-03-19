@@ -36,8 +36,8 @@ pipeline {
                     def imageTag = "${IMAGE_NAME}:${commitId}"
                     def imageLatest = "${IMAGE_NAME}:latest"
 
-                    docker.build(imageTag)
-                    docker.build(imageLatest)
+                    docker.build(imageTag, '--no-cache .')
+                    sh "docker tag ${imageTag} ${imageLatest}"
                     echo "Successfully built image."
 
                     echo "Pushing image to secure registry..."
