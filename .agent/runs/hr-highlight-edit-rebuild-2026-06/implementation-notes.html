@@ -201,6 +201,13 @@
         phase: "P3 OCR",
         actor: "agent",
         summary: "OCR built: Tesseract.js 7, same-origin engine files via setup-ocr.mjs (prebuild, gitignored). Extraction (SG NRIC/MY MyKad/name/address) 7 tests; OcrPanel integrated with operator-verify. tsc/eslint clean, 55/55 tests, next build ok. BLOCKED: live card accuracy (needs sample image + browser worker)."
+      },
+      {
+        ts: "2026-06-17T02:35:00Z",
+        status: "done",
+        phase: "P5 deploy",
+        actor: "agent",
+        summary: "Created + linked Supabase project 'Contract Manager' (Lead Gen org, ref wxwgvjcqbljrktrfikif, Singapore) and Vercel project ahkow35s-projects/contract-manager (GitHub connected). Env set prod+dev. Fixed cloud build (tsconfig excludes legacy/; root-anchored .vercelignore). DEPLOYED: https://contract-manager-olive.vercel.app — auth gate verified (/ →307 /login, /login renders Supabase sign-in). Preview env unset (CLI v54 branch quirk). NEXT: create a staff user in Supabase Auth to log in."
       }
     ];
 

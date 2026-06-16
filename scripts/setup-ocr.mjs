@@ -2,7 +2,7 @@
  * Copies the worker + core wasm from node_modules and downloads the English language data.
  * Idempotent. Runs automatically before `next build` (prebuild) and via `npm run setup:ocr`. */
 
-import { mkdirSync, copyFileSync, existsSync, writeFileSync } from 'node:fs';
+import { mkdirSync, copyFileSync, existsSync, writeFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -11,19 +11,29 @@ const outDir = join(root, 'public', 'ocr');
 const langDir = join(outDir, 'lang');
 mkdirSync(langDir, { recursive: true });
 
-const copies = [
-  ['node_modules/tesseract.js/dist/worker.min.js', 'public/ocr/worker.min.js'],
-  ['node_modules/tesseract.js-core/tesseract-core-simd-lstm.wasm', 'public/ocr/tesseract-core-simd-lstm.wasm'],
-  ['node_modules/tesseract.js-core/tesseract-core-lstm.wasm', 'public/ocr/tesseract-core-lstm.wasm'],
-];
-for (const [from, to] of copies) {
-  const src = join(root, from);
-  if (!existsSync(src)) {
-    console.error(`[setup-ocr] missing ${from} — run \`npm install\` first.`);
-    process.exit(1);
-  }
-  copyFileSync(src, join(root, to));
-  console.log(`[setup-ocr] copied ${to}`);
+// 1. Tesseract worker.
+const worker = join(root, 'node_modules/tesseract.js/dist/worker.min.js');
+if (!existsSync(worker)) {
+  console.error('[setup-ocr] missing tesseract.js — run `npm install` first.');
+  process.exit(1);
+}
+copyFileSync(worker, join(outDir, 'worker.min.js'));
+console.log('[setup-ocr] copied worker.min.js');
+
+// 2. ALL core variants. v7 loads the core through the `.wasm.js` wrapper (e.g.
+// tesseract-core-simd-lstm.wasm.js) chosen by SIMD support — copy every tesseract-core*
+// file so whichever variant the browser picks resolves same-origin. (The missing .wasm.js
+// wrappers were why OCR 404'd and silently failed.)
+const coreDir = join(root, 'node_modules/tesseract.js-core');
+const coreFiles = readdirSync(coreDir).filter((f) => f.startsWith('tesseract-core'));
+for (const f of coreFiles) copyFileSync(join(coreDir, f), join(outDir, f));
+console.log(`[setup-ocr] copied ${coreFiles.length} core files (.wasm + .wasm.js wrappers)`);
+
+// 3. pdf.js worker (same-origin) — used to rasterize PDF scans of ID cards before OCR.
+const pdfWorker = join(root, 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs');
+if (existsSync(pdfWorker)) {
+  copyFileSync(pdfWorker, join(outDir, 'pdf.worker.min.mjs'));
+  console.log('[setup-ocr] copied pdf.worker.min.mjs');
 }
 
 const TRAINEDDATA = join(langDir, 'eng.traineddata.gz');

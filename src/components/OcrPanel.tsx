@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import type { Jurisdiction } from '@/lib/merge/types';
 import { extractFromOcrText, type OcrExtract } from '@/lib/ocr/extract';
 import { recognizeImage } from '@/lib/ocr/recognize';
+import { isPdf, pdfFirstPageToBlob } from '@/lib/ocr/pdf';
 
 const ID_LABEL: Record<Jurisdiction, string> = { SG: 'NRIC card', MY: 'MyKad' };
 
@@ -26,12 +27,14 @@ export function OcrPanel({
     setResult(null);
     setProgress(0);
     setBusy(true);
-    setPreview((old) => {
-      if (old) URL.revokeObjectURL(old);
-      return URL.createObjectURL(file);
-    });
     try {
-      const text = await recognizeImage(file, setProgress);
+      // PDF scans are rasterised (first page) to an image first; the image is used for OCR + preview.
+      const imageBlob = isPdf(file) ? await pdfFirstPageToBlob(file) : file;
+      setPreview((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return URL.createObjectURL(imageBlob);
+      });
+      const text = await recognizeImage(imageBlob, setProgress);
       setResult(extractFromOcrText(text, jurisdiction));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'OCR failed.');
@@ -45,19 +48,18 @@ export function OcrPanel({
   return (
     <details className="mb-6 rounded-md border border-zinc-200 bg-zinc-50/60 px-4 py-3">
       <summary className="cursor-pointer text-sm font-medium text-zinc-800">
-        📷 Scan {ID_LABEL[jurisdiction]} to pre-fill (optional)
+        📷 Scan {ID_LABEL[jurisdiction]} to pre-fill — photo or PDF (optional)
       </summary>
 
       <p className="mt-2 text-xs text-zinc-500">
-        The image is read on your device only — it is never uploaded. Always check the result against
-        the card before generating; OCR is an assist, not a source of truth.
+        Upload a photo or a PDF scan. It is read on your device only — never uploaded. Always check
+        the result against the card before generating; OCR is an assist, not a source of truth.
       </p>
 
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
-        capture="environment"
+        accept="image/*,application/pdf"
         className="mt-3 block w-full text-sm"
         onChange={(e) => {
           const f = e.target.files?.[0];
