@@ -30,7 +30,7 @@ export default function LoginPage() {
     <main className="mx-auto flex max-w-sm flex-1 flex-col justify-center px-4">
       <div className="flex items-center gap-2 font-semibold tracking-tight">
         <span className="inline-block w-1.5 h-5 bg-yellow-400 rounded-sm" />
-        INWW Document Studio
+        Contract Manager
       </div>
 
       {!isSupabaseConfigured ? (

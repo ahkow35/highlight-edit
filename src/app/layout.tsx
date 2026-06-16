@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "INWW Document Studio",
+  title: "Contract Manager",
   description: "PDPA-safe HR document generation — all personal data stays in your browser.",
 };
 

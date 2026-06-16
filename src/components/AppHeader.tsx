@@ -10,7 +10,7 @@ export async function AppHeader() {
       <div className="mx-auto max-w-3xl px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="inline-block w-1.5 h-5 bg-yellow-400 rounded-sm" />
-          INWW Document Studio
+          Contract Manager
         </Link>
         {isSupabaseConfigured ? (
           user ? <SignOutButton email={user.email} /> : <Link href="/login" className="text-sm text-zinc-600 hover:text-zinc-900">Sign in</Link>
