@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 
-/** Generate a 14-char alphanumeric temp password (+ "A1" to satisfy basic policies). Server-side. */
+/** Generate a temp password that always satisfies the lower+upper+digit policy. Server-side. */
 export function tempPassword(): string {
-  return randomBytes(12).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 14) + 'A1';
+  const core = randomBytes(12).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 14);
+  return `${core}aA1`; // guarantees a lowercase, an uppercase, and a digit
 }

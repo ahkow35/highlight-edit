@@ -64,6 +64,11 @@ describe('SG Local Secondment — end-to-end render', () => {
   it('annual leave injected', () => {
     expect(text).toContain('14 working days');
   });
+  it('header shows full name + address (not the placeholder labels)', () => {
+    expect(text).toContain('Jane Tan Li Hua'); // header name + salutation
+    expect(text).toContain('Marina Blvd'); // header address
+    expect(text).not.toContain('Full Name');
+  });
   it('validate passes for this form', () => {
     expect(sgLocalSecondment.validate(form)).toHaveLength(0);
   });

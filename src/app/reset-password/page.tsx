@@ -43,8 +43,8 @@ export default function ResetPassword() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.');
+    if (password.length < 8 || !/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/\d/.test(password)) {
+      setError('Password must be at least 8 characters and include a lowercase letter, an uppercase letter, and a digit.');
       return;
     }
     setBusy(true);
