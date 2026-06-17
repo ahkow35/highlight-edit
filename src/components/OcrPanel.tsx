@@ -19,12 +19,14 @@ export function OcrPanel({
   const [progress, setProgress] = useState(0);
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<OcrExtract | null>(null);
+  const [rawText, setRawText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleFile(file: File) {
     setError(null);
     setResult(null);
+    setRawText('');
     setProgress(0);
     setBusy(true);
     try {
@@ -35,6 +37,7 @@ export function OcrPanel({
         return URL.createObjectURL(imageBlob);
       });
       const text = await recognizeImage(imageBlob, setProgress);
+      setRawText(text);
       setResult(extractFromOcrText(text, jurisdiction));
     } catch (e) {
       setError(e instanceof Error ? e.message : 'OCR failed.');
@@ -100,6 +103,17 @@ export function OcrPanel({
             </p>
           )}
         </div>
+      )}
+      {rawText && (
+        <details className="mt-3 text-xs text-zinc-500">
+          <summary className="cursor-pointer">Show everything the scan read</summary>
+          <p className="mt-1 text-zinc-400">
+            If a field above is blank or wrong, copy it from here — the form fields are editable.
+          </p>
+          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded border border-zinc-200 bg-white p-2 text-zinc-700">
+            {rawText}
+          </pre>
+        </details>
       )}
     </details>
   );

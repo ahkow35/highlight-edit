@@ -9,8 +9,10 @@ export async function pdfFirstPageToBlob(file: File): Promise<Blob> {
   const data = await file.arrayBuffer();
   const pdf = await pdfjs.getDocument({ data }).promise;
   const page = await pdf.getPage(1);
-  // 2x scale → sharper raster → better OCR accuracy.
-  const viewport = page.getViewport({ scale: 2 });
+  // Render at ~3x (capped) → sharper raster → better OCR on small print like the name line.
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.min(3, 2600 / Math.max(base.width, base.height));
+  const viewport = page.getViewport({ scale: Math.max(2, scale) });
 
   const canvas = document.createElement('canvas');
   canvas.width = Math.ceil(viewport.width);

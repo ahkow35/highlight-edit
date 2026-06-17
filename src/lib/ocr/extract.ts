@@ -1,5 +1,6 @@
 /* Pure extraction from raw OCR text. ID-number patterns are reliable and unit-tested; name/address
- * are best-effort heuristics (card-layout dependent) — always operator-verified, never authoritative. */
+ * are best-effort heuristics (card-layout dependent) — always operator-verified, never authoritative.
+ * The OCR panel also shows the raw text so the operator can grab anything the heuristics miss. */
 
 import type { Jurisdiction } from '../merge/types';
 
@@ -16,20 +17,25 @@ const MY_KAD = /\b(\d{6}[-\s]?\d{2}[-\s]?\d{4})\b/;
 const NAME_LABEL = /\b(name|nama)\b\s*[:.]?\s*(.*)$/i;
 const ADDR_LABEL = /\b(address|alamat)\b\s*[:.]?\s*(.*)$/i;
 
+// Words that appear on ID-card chrome (labels/headers), not in a person's name.
+const HEADER_WORDS =
+  /\b(republic|singapore|identity|card|no|nric|fin|malaysia|kad|pengenalan|mykad|warganegara|race|bangsa|sex|jantina|date|birth|tarikh|lahir|country|negara|address|alamat|name|nama|valid|expiry)\b/i;
+
 function cleanLines(text: string): string[] {
-  return text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
+  return text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 }
 
-/** Mostly-uppercase line of letters/spaces, 2+ words — a plausible printed name. */
+/** A printed personal name: mostly-letters, no digits, not card chrome, plausibly capitalised. */
 function looksLikeName(line: string): boolean {
-  if (!/^[A-Z][A-Z\s./'@-]{4,}$/.test(line)) return false;
-  const letters = line.replace(/[^A-Za-z]/g, '');
-  if (letters.length < 4) return false;
-  const upper = line.replace(/[^A-Z]/g, '').length;
-  return upper / Math.max(1, letters.length) > 0.8 && line.trim().split(/\s+/).length >= 2;
+  const t = line.trim();
+  if (t.length < 3 || t.length > 60) return false;
+  if (/\d/.test(t)) return false;
+  if (HEADER_WORDS.test(t)) return false;
+  if (!/^[A-Za-z][A-Za-z\s.,'@/-]+$/.test(t)) return false;
+  const letters = t.replace(/[^A-Za-z]/g, '');
+  if (letters.length < 3) return false;
+  const upper = t.replace(/[^A-Z]/g, '').length;
+  return upper / letters.length >= 0.6; // IC names are mostly upper-case
 }
 
 export function extractIdNumber(text: string, jurisdiction: Jurisdiction): string | undefined {
@@ -48,29 +54,33 @@ export function extractFromOcrText(text: string, jurisdiction: Jurisdiction): Oc
   const out: OcrExtract = {};
 
   out.nric = extractIdNumber(text, jurisdiction);
+  const nricLine = out.nric ? lines.findIndex((l) => l.toUpperCase().includes(out.nric!)) : -1;
 
-  // Name: prefer an explicit "Name:/Nama:" label. Value may be inline or on the next line
-  // (both ID cards put the label on its own line). Fall back to a name-shaped line.
+  // Name — strategy 1: an explicit "Name:/Nama:" label (value inline or on the next line).
   for (let i = 0; i < lines.length; i++) {
     const m = lines[i].match(NAME_LABEL);
     if (!m) continue;
     const inline = m[2].trim();
-    if (inline) {
+    if (inline && !HEADER_WORDS.test(inline)) {
       out.name = inline.replace(/\s+/g, ' ');
       break;
     }
     const next = lines[i + 1]?.trim();
-    if (next && !ADDR_LABEL.test(next)) {
+    if (next && looksLikeName(next)) {
       out.name = next.replace(/\s+/g, ' ');
       break;
     }
   }
+  // Strategy 2: first name-shaped line — searching AFTER the NRIC first (names sit near the number).
   if (!out.name) {
-    const cand = lines.find(looksLikeName);
+    const ordered = nricLine >= 0
+      ? [...lines.slice(nricLine + 1), ...lines.slice(0, nricLine + 1)]
+      : lines;
+    const cand = ordered.find(looksLikeName);
     if (cand) out.name = cand.replace(/\s+/g, ' ').trim();
   }
 
-  // Address: collect lines after an "Address:/Alamat:" label (best-effort).
+  // Address: lines following an "Address:/Alamat:" label (best-effort).
   const addrIdx = lines.findIndex((l) => ADDR_LABEL.test(l));
   if (addrIdx !== -1) {
     const inline = lines[addrIdx].match(ADDR_LABEL)?.[2]?.trim();
