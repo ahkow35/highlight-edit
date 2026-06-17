@@ -1,15 +1,11 @@
-import { randomBytes } from 'node:crypto';
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getSessionUser } from '@/lib/supabase/auth';
+import { tempPassword } from '@/lib/temp-password';
 
 async function requireAdmin() {
   const u = await getSessionUser();
   return u && u.role === 'admin' ? u : null;
-}
-
-function tempPassword() {
-  return randomBytes(12).toString('base64').replace(/[^A-Za-z0-9]/g, '').slice(0, 14) + 'A1';
 }
 
 export async function GET() {

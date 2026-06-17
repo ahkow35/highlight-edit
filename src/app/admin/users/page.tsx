@@ -76,6 +76,16 @@ export default function AdminUsers() {
     else void load();
   }
 
+  async function resetPw(u: User) {
+    if (!confirm(`Reset password for ${u.email}? You'll get a new temporary password to share.`)) return;
+    setError(null);
+    setCreated(null);
+    const res = await fetch(`/api/admin/users/${u.id}/reset-password`, { method: 'POST' });
+    const json = await res.json();
+    if (!res.ok) setError(json.error ?? 'Failed to reset password.');
+    else setCreated({ email: u.email ?? '', tempPassword: json.tempPassword });
+  }
+
   return (
     <div>
       <h1 className="text-xl font-semibold tracking-tight text-zinc-900">Users</h1>
@@ -105,8 +115,8 @@ export default function AdminUsers() {
 
       {created && (
         <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          Created <strong>{created.email}</strong>. Temporary password (shown once — share securely,
-          they can reset it later): <code className="font-mono">{created.tempPassword}</code>
+          <strong>{created.email}</strong> — temporary password (shown once; share securely over a
+          trusted channel): <code className="font-mono">{created.tempPassword}</code>
         </div>
       )}
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
@@ -144,6 +154,7 @@ export default function AdminUsers() {
                     ) : (
                       <button onClick={() => setUserRole(u, 'admin')} className="text-xs text-zinc-500 hover:text-zinc-900">Make admin</button>
                     )}
+                    <button onClick={() => resetPw(u)} className="ml-3 text-xs text-zinc-500 hover:text-zinc-900">Reset PW</button>
                     <button onClick={() => removeUser(u)} className="ml-3 text-xs text-red-500 hover:text-red-700">Remove</button>
                   </td>
                 </tr>
