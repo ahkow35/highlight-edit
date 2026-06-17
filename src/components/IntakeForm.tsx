@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { amountToWords } from '@/lib/merge/amount-to-words';
 import { downloadBlob, renderDocx } from '@/lib/merge/docx';
-import { getTemplate } from '@/lib/merge/registry';
+import { resolveTemplate, type RuntimeTemplate } from '@/lib/merge/runtime';
 import type { FieldDef, FormValues } from '@/lib/merge/types';
 import type { OcrExtract } from '@/lib/ocr/extract';
 import { OcrPanel } from './OcrPanel';
@@ -16,21 +16,34 @@ function initialValues(fields: FieldDef[]): FormValues {
 }
 
 export function IntakeForm({ templateId }: { templateId: string }) {
-  const template = getTemplate(templateId);
-  const [values, setValues] = useState<FormValues>(() => initialValues(template?.fields ?? []));
+  const [template, setTemplate] = useState<RuntimeTemplate | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [values, setValues] = useState<FormValues>({});
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
-  if (!template) {
-    return <p className="text-sm text-red-600">Unknown template: {templateId}</p>;
-  }
+  useEffect(() => {
+    let active = true;
+    resolveTemplate(templateId).then((t) => {
+      if (!active) return;
+      setTemplate(t);
+      setValues(t ? initialValues(t.fields) : {});
+      setLoading(false);
+    });
+    return () => {
+      active = false;
+    };
+  }, [templateId]);
 
-  const hasSalaryWords = template.fields.some((f) => f.id === 'salaryWords');
+  if (loading) return <p className="text-sm text-zinc-400">Loading…</p>;
+  if (!template) return <p className="text-sm text-red-600">Unknown template: {templateId}</p>;
+
+  const t = template;
+  const hasSalaryWords = t.fields.some((f) => f.id === 'salaryWords');
 
   function set(id: string, value: string) {
     setValues((prev) => {
       const next = { ...prev, [id]: value };
-      // Auto-fill salary-in-words from the figure when the words field is still empty.
       if (id === 'salaryFigure' && hasSalaryWords && !prev.salaryWords) {
         next.salaryWords = amountToWords(value);
       }
@@ -41,31 +54,28 @@ export function IntakeForm({ templateId }: { templateId: string }) {
   function applyOcr(extract: OcrExtract) {
     setValues((prev) => {
       const next = { ...prev };
-      for (const f of template!.fields) {
+      for (const f of t.fields) {
         if (f.ocrSource && extract[f.ocrSource]) next[f.id] = extract[f.ocrSource]!;
       }
-      // keep salary words in sync if name/etc changed nothing relevant — no-op here
       return next;
     });
   }
 
   async function generate() {
-    const errs = template!.validate(values);
+    const errs = t.validate(values);
     setErrors(errs);
     if (errs.length) return;
     setBusy(true);
     try {
-      // Blank template fetched from same origin (no PII). Merge + download is 100% client-side.
-      const res = await fetch(`/templates/${template!.templateFile}`);
-      if (!res.ok) throw new Error(`Template not found (${res.status})`);
-      const buf = await res.arrayBuffer();
-      const blob = renderDocx(buf, template!.tokens(values));
-      downloadBlob(blob, template!.fileName(values));
+      // Blank template bytes (static file or DB base64). Merge + download is 100% client-side.
+      const buf = await t.getDocxBytes();
+      const blob = renderDocx(buf, t.tokens(values));
+      downloadBlob(blob, t.fileName(values));
       // Log usage — template + user + timestamp only, never any field values. Fire-and-forget.
       void fetch('/api/usage', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ templateId: template!.id }),
+        body: JSON.stringify({ templateId: t.id }),
       }).catch(() => {});
     } catch (e) {
       setErrors([e instanceof Error ? e.message : 'Failed to generate document.']);
@@ -79,7 +89,7 @@ export function IntakeForm({ templateId }: { templateId: string }) {
       <div className="mb-4 flex items-center gap-2 text-xs text-zinc-500">
         <Link href="/" className="hover:text-zinc-900">← Templates</Link>
       </div>
-      <h1 className="text-xl font-semibold tracking-tight text-zinc-900">{template.title}</h1>
+      <h1 className="text-xl font-semibold tracking-tight text-zinc-900">{t.title}</h1>
 
       <p className="mt-2 rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
         🔒 Everything you type stays in this browser. The document is generated on your device and
@@ -87,7 +97,7 @@ export function IntakeForm({ templateId }: { templateId: string }) {
       </p>
 
       <div className="mt-4">
-        {template.ocr && <OcrPanel jurisdiction={template.jurisdiction} onApply={applyOcr} />}
+        {t.ocr && <OcrPanel jurisdiction={t.jurisdiction === 'MY' ? 'MY' : 'SG'} onApply={applyOcr} />}
       </div>
 
       <form
@@ -97,7 +107,7 @@ export function IntakeForm({ templateId }: { templateId: string }) {
           void generate();
         }}
       >
-        {template.fields.map((f) => (
+        {t.fields.map((f) => (
           <Field key={f.id} field={f} value={values[f.id] ?? ''} onChange={(v) => set(f.id, v)} />
         ))}
 
@@ -142,7 +152,7 @@ function Field({ field, value, onChange }: { field: FieldDef; value: string; onC
       ) : (
         <input
           className={base}
-          type={field.type === 'date' ? 'date' : field.type === 'number' || field.type === 'currency' ? 'text' : 'text'}
+          type={field.type === 'date' ? 'date' : 'text'}
           inputMode={field.type === 'number' || field.type === 'currency' ? 'decimal' : undefined}
           value={value}
           onChange={(e) => onChange(e.target.value)}
