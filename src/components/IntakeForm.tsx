@@ -61,6 +61,11 @@ export function IntakeForm({ templateId }: { templateId: string }) {
     });
   }
 
+  function clearForm() {
+    setValues(initialValues(t.fields));
+    setErrors([]);
+  }
+
   async function generate() {
     const errs = t.validate(values);
     setErrors(errs);
@@ -119,13 +124,22 @@ export function IntakeForm({ templateId }: { templateId: string }) {
           </ul>
         )}
 
-        <button
-          type="submit"
-          disabled={busy}
-          className="yellow-bar rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
-        >
-          {busy ? 'Generating…' : 'Generate .docx'}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={busy}
+            className="yellow-bar rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+          >
+            {busy ? 'Generating…' : 'Generate .docx'}
+          </button>
+          <button
+            type="button"
+            onClick={clearForm}
+            className="text-sm text-zinc-500 underline underline-offset-2 hover:text-zinc-900"
+          >
+            Clear form
+          </button>
+        </div>
       </form>
     </div>
   );
