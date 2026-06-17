@@ -13,17 +13,28 @@ export default function ResetPassword() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // The reset email link lands here with a PKCE ?code= (or an established recovery session).
+  // The reset link lands here as implicit hash tokens (#access_token=…&refresh_token=…) — the
+  // primary path. Fallbacks: PKCE ?code=, or an already-established recovery session.
   useEffect(() => {
     const supabase = createClient();
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const access_token = hash.get('access_token');
+    const refresh_token = hash.get('refresh_token');
     const code = new URLSearchParams(window.location.search).get('code');
     (async () => {
+      if (access_token && refresh_token) {
+        const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+        // Strip the tokens from the address bar once consumed.
+        window.history.replaceState(null, '', window.location.pathname);
+        setPhase(error ? 'invalid' : 'ready');
+        return;
+      }
       if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code);
         setPhase(error ? 'invalid' : 'ready');
         return;
       }
-      // Server-verified (not getSession, which trusts local storage) before allowing a password change.
+      // Server-verified (not getSession, which trusts local storage) before allowing a change.
       const { data } = await supabase.auth.getUser();
       setPhase(data.user ? 'ready' : 'invalid');
     })();

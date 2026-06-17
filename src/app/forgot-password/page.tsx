@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { createRecoveryClient } from '@/lib/supabase/recovery';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 
 export default function ForgotPassword() {
@@ -15,7 +15,8 @@ export default function ForgotPassword() {
     e.preventDefault();
     setError(null);
     setBusy(true);
-    const { error } = await createClient().auth.resetPasswordForEmail(email, {
+    // Implicit client → the email link delivers hash tokens (no PKCE verifier needed).
+    const { error } = await createRecoveryClient().auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setBusy(false);
