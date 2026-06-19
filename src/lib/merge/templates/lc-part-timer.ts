@@ -1,14 +1,16 @@
 /* LC Malaysia part-timer employment contract — the retained prior build.
- * Field set + token map + validation + filename ported verbatim from
+ * Field set + token map + validation + filename ported from
  * CoWork/Employment Contract/contract-merge.js (design approved 2026-06-10).
- * BLOCKED for live use until the official LC part-timer .docx is tokenised + dropped in. */
+ * The tokenised .docx is a content-faithful reconstruction of LC's supplied PDFs
+ * (the original Word file was never provided). Swap in LC's real .docx if it surfaces. */
 
-import { durationStr, firstName, longOrdinal, parseISO } from '../format';
+import { durationStr, longOrdinal, parseISO } from '../format';
 import type { FormValues, TemplateDef, TokenMap } from '../types';
 
 function validate(f: FormValues): string[] {
   const errs: string[] = [];
   if (!f.name?.trim()) errs.push('Employee name is required.');
+  if (!f.salutation?.trim()) errs.push('Salutation (given name) is required.');
   if (!f.address?.trim()) errs.push('Home address is required.');
   if (!f.jobTitle?.trim()) errs.push('Job title is required.');
   if (!f.client?.trim()) errs.push('Client / brand is required.');
@@ -28,8 +30,8 @@ function tokens(f: FormValues): TokenMap {
   return {
     letterDate: longOrdinal(f.letterDate) ?? '',
     name: f.name.trim(),
+    salutation: f.salutation.trim(), // "Dear ___," — given name; operator-set (surname-first names)
     address: f.address.trim(), // newlines -> line breaks at render time
-    firstName: firstName(f.name),
     jobTitle: f.jobTitle.trim(),
     client: f.client.trim(),
     duration: durationStr(f.startDate, f.endDate) ?? '',
@@ -53,11 +55,13 @@ export const lcPartTimer: TemplateDef = {
   id: 'lc-part-timer-my',
   title: 'LC Malaysia — Part-Timer Employment Contract',
   jurisdiction: 'MY',
-  templateFile: 'lc-part-timer-my.docx', // BLOCKED: awaiting official tokenised .docx
+  templateFile: 'lc-part-timer-my.docx', // content-faithful reconstruction of LC's PDF
   ocr: true,
   fields: [
     { id: 'letterDate', label: 'Letter date', type: 'date', required: true },
-    { id: 'name', label: 'Employee name', type: 'text', required: true, ocrSource: 'name' },
+    { id: 'name', label: 'Employee full name', type: 'text', required: true, ocrSource: 'name' },
+    { id: 'salutation', label: 'Salutation (given name)', type: 'text', required: true,
+      help: 'How they are addressed in "Dear ___," — e.g. Sarah, or Mei Jun for surname-first names.' },
     { id: 'address', label: 'Home address', type: 'textarea', required: true, ocrSource: 'address' },
     { id: 'jobTitle', label: 'Job title', type: 'text', required: true, default: 'Seasonal Part Time Assistant' },
     { id: 'client', label: 'Client / brand + mall', type: 'text', required: true },

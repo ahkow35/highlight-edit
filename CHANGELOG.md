@@ -2,6 +2,25 @@
 
 All notable changes to Contract Manager (formerly highlight-edit).
 
+## 2026-06-19 (later)
+
+### Non-Local Secondment — commission now fully optional
+- Added a `hasCommissionScheme` toggle wrapping the Sales Commission Scheme clause, so a
+  hire with no commission gets neither the scheme nor the guarantee. The first-3-months
+  guaranteed-commission toggle is now nested under it (shown only when the scheme is on),
+  and the guarantee is suppressed in output if the scheme is off.
+- `IntakeForm.isVisible` now follows the `showIf` chain transitively (unticking a parent
+  hides the whole dependent subtree).
+
+### Malaysia (LC Part-Timer) — unblocked
+- Reconstructed a **content-faithful tokenised `.docx`** from LC's supplied PDFs
+  (Sarah / Chen) — clauses 1–12, the overtime multiplier table, the Luxury Careers
+  footer, and the Irene Law signatory. LC's original Word file was never provided; the
+  reconstruction can be swapped for the real `.docx` if it surfaces.
+- Replaced the unreliable `firstName`-derived salutation with an explicit operator
+  **Salutation** field — surname-first Malaysian-Chinese names (e.g. "Chen Mei Jun" →
+  "Dear Mei Jun,") can't be auto-derived. Removed `lc-part-timer-my` from the blocked list.
+
 ## 2026-06-19
 
 ### Added — two new SG contract templates

@@ -54,8 +54,15 @@ export function IntakeForm({ templateId }: { templateId: string }) {
     });
   }
 
-  // A field is hidden until its controlling checkbox (showIf) is ticked.
-  const isVisible = (f: FieldDef) => !f.showIf || !!values[f.showIf];
+  // A field is hidden until its controlling checkbox (showIf) is ticked — and that
+  // controller must itself be visible, so unticking a parent hides the whole chain.
+  const byId = new Map(t.fields.map((f) => [f.id, f]));
+  function isVisible(f: FieldDef): boolean {
+    if (!f.showIf) return true;
+    if (!values[f.showIf]) return false;
+    const parent = byId.get(f.showIf);
+    return parent ? isVisible(parent) : true;
+  }
 
   function applyOcr(extract: OcrExtract) {
     setValues((prev) => {

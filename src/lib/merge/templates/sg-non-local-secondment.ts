@@ -31,7 +31,7 @@ function validate(f: FormValues): string[] {
     if (!posAmount(f.travelFigure)) errs.push('Travel allowance must be a positive number.');
     if (!f.travelWords?.trim()) errs.push('Travel allowance in words is required (auto-filled — please verify).');
   }
-  if (on(f, 'hasGuaranteedCommission') && !posAmount(f.guaranteedFigure))
+  if (on(f, 'hasCommissionScheme') && on(f, 'hasGuaranteedCommission') && !posAmount(f.guaranteedFigure))
     errs.push('Guaranteed commission must be a positive number.');
   if (on(f, 'hasDiscretionaryBonus') && !f.bonusDate?.trim())
     errs.push('Discretionary bonus qualifying date is required (e.g. 31 August).');
@@ -51,7 +51,8 @@ function validate(f: FormValues): string[] {
 
 function tokens(f: FormValues): TokenMap {
   const travel = on(f, 'hasTravelAllowance');
-  const commission = on(f, 'hasGuaranteedCommission');
+  const scheme = on(f, 'hasCommissionScheme');
+  const guaranteed = scheme && on(f, 'hasGuaranteedCommission'); // guarantee only within the scheme
   const bonus = on(f, 'hasDiscretionaryBonus');
   return {
     letterDate: longOrdinal(f.letterDate) ?? '',
@@ -66,8 +67,9 @@ function tokens(f: FormValues): TokenMap {
     hasTravelAllowance: travel,
     travelFigure: travel ? fmtFigure(f.travelFigure) : '',
     travelWords: travel ? (f.travelWords?.trim() || amountToWords(f.travelFigure)) : '',
-    hasGuaranteedCommission: commission,
-    guaranteedFigure: commission ? fmtFigure(f.guaranteedFigure) : '',
+    hasCommissionScheme: scheme,
+    hasGuaranteedCommission: guaranteed,
+    guaranteedFigure: guaranteed ? fmtFigure(f.guaranteedFigure) : '',
     hasDiscretionaryBonus: bonus,
     bonusDate: bonus ? f.bonusDate.trim() : '',
     startDate: longOrdinal(f.startDate) ?? '',
@@ -104,7 +106,10 @@ export const sgNonLocalSecondment: TemplateDef = {
     { id: 'travelWords', label: 'Travel allowance in words', type: 'text', required: true,
       showIf: 'hasTravelAllowance', help: 'Auto-filled from the figure — verify before generating.' },
 
+    { id: 'hasCommissionScheme', label: 'Include sales commission scheme', type: 'checkbox',
+      help: 'Adds the Sales Commission Scheme participation clause. Leave off for hires with no commission.' },
     { id: 'hasGuaranteedCommission', label: 'Include first-3-months guaranteed commission', type: 'checkbox',
+      showIf: 'hasCommissionScheme',
       help: 'Adds the guaranteed-commission clause (S$/month for the first 3 months).' },
     { id: 'guaranteedFigure', label: 'Guaranteed commission per month (S$)', type: 'currency', required: true,
       showIf: 'hasGuaranteedCommission' },

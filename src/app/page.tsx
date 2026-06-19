@@ -9,7 +9,7 @@ const JURISDICTION_STYLE: Record<string, string> = {
 };
 
 // Static templates not yet ready for live use (awaiting the official tokenised .docx).
-const BLOCKED = new Set(['lc-part-timer-my']);
+const BLOCKED = new Set<string>([]);
 
 interface Item {
   id: string;

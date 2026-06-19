@@ -65,8 +65,9 @@ describe('SG Non-Local Secondment — end-to-end render', () => {
       expect(text).toContain('31st July 2027');
       expect(text).toContain('13 working days');
     });
-    it('omits all three optional clauses', () => {
+    it('omits every optional clause (travel, commission scheme, guarantee, bonus)', () => {
       expect(text).not.toContain('travel allowance');
+      expect(text).not.toContain('Sales Commission Scheme');
       expect(text).not.toContain('guaranteed commission');
       expect(text).not.toContain('discretionary bonus');
     });
@@ -81,6 +82,7 @@ describe('SG Non-Local Secondment — end-to-end render', () => {
       hasTravelAllowance: '1',
       travelFigure: '200',
       travelWords: 'Two Hundred',
+      hasCommissionScheme: '1',
       hasGuaranteedCommission: '1',
       guaranteedFigure: '800',
       hasDiscretionaryBonus: '1',
@@ -96,7 +98,8 @@ describe('SG Non-Local Secondment — end-to-end render', () => {
       expect(text).toContain('S$200');
       expect(text).toContain('Two Hundred');
     });
-    it('includes the guaranteed-commission clause', () => {
+    it('includes the commission scheme + guaranteed-commission clause', () => {
+      expect(text).toContain('Sales Commission Scheme');
       expect(text).toContain('guaranteed commission');
       expect(text).toContain('S$800');
     });
@@ -109,10 +112,29 @@ describe('SG Non-Local Secondment — end-to-end render', () => {
     });
   });
 
+  describe('commission scheme gating', () => {
+    it('scheme on, guarantee off: scheme text present, no guaranteed-commission clause', () => {
+      const text = renderText(sgNonLocalSecondment.tokens({ ...base, hasCommissionScheme: '1' }));
+      expect(text).toContain('Sales Commission Scheme');
+      expect(text).not.toContain('guaranteed commission');
+    });
+    it('scheme off suppresses the guarantee even if its flag lingers', () => {
+      const text = renderText(
+        sgNonLocalSecondment.tokens({ ...base, hasGuaranteedCommission: '1', guaranteedFigure: '800' }),
+      );
+      expect(text).not.toContain('Sales Commission Scheme');
+      expect(text).not.toContain('guaranteed commission');
+    });
+  });
+
   describe('conditional validation', () => {
     it('flags a missing travel figure only when the toggle is on', () => {
       const errs = sgNonLocalSecondment.validate({ ...base, hasTravelAllowance: '1' });
       expect(errs.some((e) => /travel allowance must be/i.test(e))).toBe(true);
+    });
+    it('does not flag the guarantee figure when the scheme is off', () => {
+      const errs = sgNonLocalSecondment.validate({ ...base, hasGuaranteedCommission: '1' });
+      expect(errs.some((e) => /guaranteed commission must be/i.test(e))).toBe(false);
     });
   });
 });
