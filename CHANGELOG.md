@@ -28,6 +28,13 @@ All notable changes to Contract Manager (formerly highlight-edit).
 - 96 tests pass (was 90); per-brand integration tests render each contract and assert
   brand boilerplate is intact.
 
+### Contract Staff — follow-ups
+- **Coach** re-tokenised from LC's real `.docx` (received as proper Word) — full
+  letterhead/logo restored; the textutil stopgap is dropped.
+- **All five now fixed-term:** Givenchy and Guerlain had no end date in LC's files, so
+  inserted LC's standard "Contract Duration" clause (verbatim wording) before
+  "Schedule Of Benefits"; both gained a contract end-date field.
+
 ## 2026-06-19 (later)
 
 ### Non-Local Secondment — commission now fully optional

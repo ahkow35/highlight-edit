@@ -100,6 +100,8 @@ describe('MY Contract Staff — per-brand render', () => {
     expect(text).toContain('Yelena TAN'); // fixed client co-signatory
     expect(text).toContain('as Travelling Allowance');
     expect(text).toContain('I, Tan Mei Ling, confirm');
+    // fixed-term: inserted Contract Duration clause with both dates
+    expect(text).toContain('The agreed employment duration is from 15th July 2026 to 14th July 2027');
   });
 
   it('Guerlain: initial + post-probation salary/allowance', () => {
@@ -116,6 +118,8 @@ describe('MY Contract Staff — per-brand render', () => {
     expect(text).toContain('revised to RM2,300');
     expect(text).toContain('Annual Wage Supplement'); // fixed clause
     expect(text).toContain('Product Allowance'); // fixed annex clause
+    // fixed-term: inserted Contract Duration clause with both dates
+    expect(text).toContain('The agreed employment duration is from 15th July 2026 to 14th July 2027');
   });
 
   it('validate flags missing required fields', () => {

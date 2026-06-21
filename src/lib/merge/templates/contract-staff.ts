@@ -101,10 +101,6 @@ const DATES: FieldDef[] = [
     help: 'Also used as the "with effect of" date.' },
   { id: 'endDate', label: 'Contract end date', type: 'date', required: true },
 ];
-// Givenchy / Guerlain are open-ended (no contract end date in the document).
-const START_ONLY: FieldDef[] = [
-  { id: 'startDate', label: 'Start date (with effect of)', type: 'date', required: true },
-];
 const NRIC: FieldDef = { id: 'nric', label: 'NRIC (optional)', type: 'nric', ocrSource: 'nric',
   help: 'Not printed in the contract body; for your record / OCR check only.' };
 
@@ -177,7 +173,7 @@ export const csGivenchy = makeContractStaff({
     ...salary(),
     ...allowance('travel', 'Travelling Allowance'),
     ...allowance('grooming', 'Grooming Allowance'),
-    ...START_ONLY,
+    ...DATES,
     NRIC,
   ],
 });
@@ -194,7 +190,7 @@ export const csGuerlain = makeContractStaff({
     ...allowance('travel', 'Travelling Allowance — initial'),
     ...allowance('postProbSalary', 'Post-probation monthly salary'),
     ...allowance('postProbTravel', 'Post-probation Travelling Allowance'),
-    ...START_ONLY,
+    ...DATES,
     NRIC,
   ],
 });
