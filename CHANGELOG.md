@@ -11,9 +11,22 @@ All notable changes to Contract Manager (formerly highlight-edit).
 - Multi-paragraph address block collapses to a single `{address}` token (line breaks
   preserved). 90 tests pass.
 
-### Contract Staff (5 brands) — assessed, not yet built
-- These are **not** one template: per-brand divergence in allowances, benefits annex,
-  public-holiday tables, and client co-signatories. Decision on approach pending.
+### Contract Staff (5 brands) — built as per-brand templates
+- These are **not** one template (per-brand divergence in allowances, benefits annex,
+  public-holiday tables, client co-signatories), so each brand is its own tokenised
+  template; only per-employee fields are filled, all brand-specific content stays fixed.
+- Config-driven factory (`contract-staff.ts`): generic MY validate/tokens + the
+  `{prefix}Figure→{prefix}Words` auto-fill; each brand = a field list + its `.docx`.
+  - **Bvlgari**: salary + Transport/Meal/Grooming allowances, fixed-term.
+  - **Chanel**: role in intro, en-dash duration, salary only, name in confirm line.
+  - **Coach**: salary + one allowance (converted from `.doc` via textutil — note: that
+    conversion drops LC's letterhead/logo; the other four use their real `.docx`).
+  - **Givenchy**: 2 allowances, **open-ended** (no end date), LVMH co-signatory fixed.
+  - **Guerlain**: initial + **post-probation** salary/allowance, open-ended.
+- Fixed a tokeniser double-escaping bug (`&amp;` → `&amp;amp;`) that surfaced on
+  Guerlain's "LVMH Perfumes & Cosmetics" client name.
+- 96 tests pass (was 90); per-brand integration tests render each contract and assert
+  brand boilerplate is intact.
 
 ## 2026-06-19 (later)
 
