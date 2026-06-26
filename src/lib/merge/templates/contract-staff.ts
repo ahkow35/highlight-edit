@@ -118,6 +118,19 @@ const allowance = (prefix: string, label: string, def?: string): FieldDef[] => [
     help: 'Auto-filled from the figure — verify before generating.' },
 ];
 
+// Probation & termination-notice — operator-editable, printed in the probation/termination
+// clauses. `def` pre-fills the brand's standard probation length; notice periods are entered
+// per hire (no statutory default baked in). Optional: brands without a probation clause
+// (e.g. Chanel, Guerlain) leave these blank and their .docx simply carries no matching token.
+const probation = (def?: string): FieldDef[] => [
+  { id: 'probationMonths', label: 'Probation period (months)', type: 'text', default: def,
+    help: 'Number of months of probation (printed in the probation clause).' },
+  { id: 'noticeProbation', label: 'Termination notice during probation (months)', type: 'text',
+    help: "Months' notice required to terminate during probation." },
+  { id: 'noticeAfterProbation', label: 'Termination notice after probation (months)', type: 'text',
+    help: "Months' notice required to terminate after probation." },
+];
+
 export const csBvlgari = makeContractStaff({
   id: 'my-cs-bvlgari',
   title: 'MY Contract Staff — Bvlgari (Parfum Travel Retail)',
@@ -131,6 +144,7 @@ export const csBvlgari = makeContractStaff({
     ...allowance('meal', 'Meal Allowance', '200'),
     ...allowance('grooming', 'Grooming Allowance', '100'),
     ...DATES,
+    ...probation('3'),
     NRIC,
   ],
 });
@@ -146,6 +160,7 @@ export const csChanel = makeContractStaff({
       default: 'Contract Beauty Advisor', help: 'Appears in the opening "employment with us as a ___" line.' },
     { id: 'salaryFigure', label: 'Monthly basic salary (RM)', type: 'currency', required: true },
     ...DATES,
+    ...probation(),
     NRIC,
   ],
 });
@@ -161,6 +176,7 @@ export const csCoach = makeContractStaff({
     ...salary(),
     ...allowance('allowance', 'Monthly allowance', '100'),
     ...DATES,
+    ...probation('6'),
     NRIC,
   ],
 });
@@ -177,6 +193,7 @@ export const csGivenchy = makeContractStaff({
     ...allowance('travel', 'Travelling Allowance', '500'),
     ...allowance('grooming', 'Grooming Allowance', '100'),
     ...DATES,
+    ...probation('3'),
     NRIC,
   ],
 });
@@ -194,6 +211,7 @@ export const csGuerlain = makeContractStaff({
     ...allowance('postProbSalary', 'Post-probation monthly salary'),
     ...allowance('postProbTravel', 'Post-probation Travelling Allowance', '600'),
     ...DATES,
+    ...probation(),
     NRIC,
   ],
 });
