@@ -2,6 +2,36 @@
 
 All notable changes to Contract Manager (formerly highlight-edit).
 
+## 2026-06-27 — LC Contract Staff: operator feedback round
+
+Applied the operator's feedback to all 5 LC Malaysia Contract Staff brand templates,
+in two phases (`feat/lc-contract-staff-updates`).
+
+**Phase A — schema (`contract-staff.ts`):** added operator-editable `probationMonths`,
+`noticeProbation`, `noticeAfterProbation` fields to every brand via a shared `probation()`
+helper. `probationMonths` pre-fills per brand (Bvlgari/Givenchy 3, Coach 6; Chanel/Guerlain
+blank). The generic factory auto-wires the tokens.
+
+**Phase B — templates (.docx):**
+- **Bold** Contract Start/End Date, Position, Salary, and Allowance values (run-split so only
+  the value bolds, not the sentence).
+- **Probation** period tokenised to `{probationMonths}` (Bvlgari/Coach/Givenchy; Chanel/Guerlain
+  have no fixed-term clause so stay blank).
+- **Confirmation** statement → "I, {name}, confirm…" (Bvlgari/Coach/Guerlain; Chanel/Givenchy
+  already carried it).
+- **Coach footer** updated to the new registered address (Menara AIA Sentral); the other four
+  brands already had it.
+- **Address** paragraph forced to single line-spacing — fixes the over-large gaps between
+  address lines reported in Word.
+
+**Deferred (per operator):** the annual-leave clause + full-time toggle, and tokenising the
+termination-notice periods (a weeks→months change that needs an HR-law check). The
+`noticeProbation`/`noticeAfterProbation` fields exist in the form but are not yet printed.
+
+Verification: `tsc` clean, 98 tests pass, structural checks confirm every change landed.
+Bold/line-spacing are not test-visible — sample contracts (Bvlgari, Coach) generated for a
+Word eyeball before merge.
+
 ## 2026-06-21 (later) — MyKad OCR: full address extraction
 
 Building on the binarisation fix — the middle address rows ("TAMAN BUKIT MEWAH",
